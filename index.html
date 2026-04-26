@@ -35,6 +35,20 @@
     @media (min-width: 640px) {
       input, textarea, select { font-size: inherit; }
     }
+    /* iOS time input이 기본 padding/min-width를 무시하고 컨테이너에 맞도록 */
+    input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      display: block;
+    }
+    input[type="time"]::-webkit-date-and-time-value {
+      text-align: left;
+      min-width: 0;
+    }
   </style>
 
 </head>
