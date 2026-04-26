@@ -115,7 +115,7 @@
 다음 할 일 목록을 분석해서 최적 순서의 JSON 배열로 반환해주세요:
 ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -365,6 +365,17 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
         }
       };
 
+      // 긴 에러 메시지를 사용자 친화적으로 변환
+      const friendlyError = (msg) => {
+        if (!msg) return '';
+        if (msg.includes('quota') || msg.includes('Quota')) return '⏱️ API 사용 한도를 초과했어요. 잠시 후 다시 시도하거나 다른 키를 써주세요.';
+        if (msg.includes('API key') || msg.includes('API_KEY') || msg.includes('invalid')) return '🔑 API 키가 올바르지 않아요. 설정에서 다시 확인해주세요.';
+        if (msg.includes('429')) return '⏱️ 너무 자주 요청했어요. 잠시 후 다시 시도해주세요.';
+        if (msg.includes('해석할 수 없')) return msg;
+        if (msg.length > 120) return msg.slice(0, 120) + '...';
+        return msg;
+      };
+
       const cycleStatus = (id) => {
         setTasks(tasks.map(t => {
           if (t.id !== id) return t;
@@ -470,8 +481,8 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                 </div>
 
                 {error && (
-                  <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
-                    {error}
+                  <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 break-words">
+                    {friendlyError(error)}
                   </div>
                 )}
 
@@ -486,7 +497,7 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                 <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
                   <div className="flex items-center gap-2">
                     <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-emerald-500' : 'bg-stone-300'}`} />
-                    <span>{apiKey ? 'Gemini 2.0 Flash 연결됨' : '키 미설정'}</span>
+                    <span>{apiKey ? 'Gemini 1.5 Flash 연결됨' : '키 미설정'}</span>
                   </div>
                   {tasks.length > 0 && (
                     <button onClick={clearAll} className="text-stone-400 hover:text-red-600 transition">
