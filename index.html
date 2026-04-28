@@ -1,27 +1,23 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#fafaf9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="LUPL Planner" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>LUPL Planner</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231c1917'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
 
-  <!-- Pretendard 한글 폰트 -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231c1917'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%231c1917'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-family='sans-serif' font-size='100' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"LUPL Planner","short_name":"LUPL","description":"AI 일정 정리","start_url":"./","display":"standalone","background_color":"%23fafaf9","theme_color":"%23fafaf9","orientation":"portrait","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2738%27 fill=%27%231c1917%27/%3E%3Ctext x=%2796%27 y=%27135%27 text-anchor=%27middle%27 font-family=%27sans-serif%27 font-size=%27110%27 font-weight=%27bold%27 fill=%27white%27%3EL%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
 
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
-
-  <!-- Tailwind CDN -->
-
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- React + Babel -->
-
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
@@ -29,70 +25,52 @@
       font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    /* iOS 입력칸 줌 방지 */
     input, textarea, select { font-size: 16px; }
-    @media (min-width: 640px) {
-      input, textarea, select { font-size: inherit; }
-    }
-    /* iOS time input이 기본 padding/min-width를 무시하고 컨테이너에 맞도록 */
+    @media (min-width: 640px) { input, textarea, select { font-size: inherit; } }
     input[type="time"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100% !important;
-      min-width: 0 !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
-      display: block;
+      -webkit-appearance: none; appearance: none;
+      width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+      box-sizing: border-box !important; display: block;
     }
-    input[type="time"]::-webkit-date-and-time-value {
-      text-align: left;
-      min-width: 0;
-    }
+    input[type="time"]::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+    @keyframes softpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .pulse-dot { animation: softpulse 1.5s ease-in-out infinite; }
+    .drag-handle { cursor: ew-resize; touch-action: none; }
+    .font-mono-tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
   </style>
-
 </head>
 <body class="bg-stone-50">
   <div id="root"></div>
 
   <script type="text/babel" data-presets="react">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useCallback } = React;
 
-    // ========== 아이콘 (lucide SVG 인라인) ==========
     const Icon = ({ d, className = "w-4 h-4", strokeWidth = 2, fill = "none" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {d}
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>{d}</svg>
     );
     const IconSparkles = (p) => <Icon {...p} d={<><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></>} />;
     const IconClock = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
     const IconCheck = (p) => <Icon {...p} d={<><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></>} />;
     const IconCircle = (p) => <Icon {...p} d={<circle cx="12" cy="12" r="10"/>} />;
     const IconPlay = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></>} />;
+    const IconPlayBig = (p) => <Icon {...p} d={<polygon points="6 3 20 12 6 21 6 3"/>} />;
+    const IconPauseBig = (p) => <Icon {...p} d={<><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>} />;
     const IconList = (p) => <Icon {...p} d={<><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></>} />;
     const IconChart = (p) => <Icon {...p} d={<><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></>} />;
     const IconX = (p) => <Icon {...p} d={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />;
-    const IconPlus = (p) => <Icon {...p} d={<><path d="M5 12h14"/><path d="M12 5v14"/></>} />;
     const IconKey = (p) => <Icon {...p} d={<><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></>} />;
     const IconSettings = (p) => <Icon {...p} d={<><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>} />;
     const IconTrash = (p) => <Icon {...p} d={<><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>} />;
     const IconLoader = (p) => <Icon {...p} d={<path d="M21 12a9 9 0 1 1-6.219-8.56"/>} className={(p.className || "w-4 h-4") + " animate-spin"} />;
+    const IconLayers = (p) => <Icon {...p} d={<><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></>} />;
 
-    // ========== localStorage 헬퍼 ==========
-    const STORAGE = {
-      apiKey: 'lupl_planner_api_key',
-      tasks: 'lupl_planner_tasks',
-      meta: 'lupl_planner_meta',
-    };
-    const load = (key, fallback) => {
-      try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-      catch { return fallback; }
-    };
-    const save = (key, value) => {
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-    };
+    const STORAGE = { apiKey: 'lupl_planner_api_key', tasks: 'lupl_planner_tasks', meta: 'lupl_planner_meta' };
+    const load = (key, fallback) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } };
+    const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 
-    // ========== 시간 유틸 ==========
     const formatTime = (baseDate, offsetMin) => {
       const t = new Date(baseDate.getTime() + offsetMin * 60000);
       return `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
@@ -100,75 +78,46 @@
     const getBaseTime = (mode, scheduledTime) => {
       if (mode === 'now') return new Date();
       const [h, m] = scheduledTime.split(':').map(Number);
-      const d = new Date();
-      d.setHours(h, m, 0, 0);
-      return d;
+      const d = new Date(); d.setHours(h, m, 0, 0); return d;
+    };
+    const formatCountdown = (sec) => {
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60); const r = s % 60;
+      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
     };
 
-    // ========== AI 분석 (Google Gemini) ==========
-    async function analyzeTasks(rawText, apiKey) {
-      const taskList = rawText.split('\n').map(s => s.trim()).filter(Boolean);
-      if (taskList.length === 0) throw new Error('할 일이 비어있어요');
+    const GEMINI_URL = (apiKey) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
-      const fullPrompt = `당신은 일정 최적화 전문가입니다. 사용자가 입력한 할 일 목록을 분석해 각 작업의 소요시간(duration)과 능동시간(activeTime), 병렬 가능 여부(parallel)를 판단합니다.
-
-규칙:
-- duration: 작업이 시작되어 완료될 때까지 걸리는 총 시간(분)
-- activeTime: 그중 사람이 손/주의를 직접 써야 하는 시간(분). duration보다 작거나 같음
-- parallel: activeTime < duration이면 true (예: 빨래 돌리기는 2분 세팅 후 28분 자동 → parallel: true)
-- 단독 집중 작업(글쓰기, 청소, 회의 등)은 parallel: false, activeTime = duration
-
-순서 정렬 원칙:
-1. parallel 작업을 먼저 시작해서 대기시간 동안 다른 작업을 끼워넣음
-2. activeTime이 짧은 parallel 작업부터 → 그 대기시간 동안 단독 작업 처리
-3. startMin은 각 작업의 시작 시점(분, 0부터). 병렬 작업의 대기 구간에 다른 작업이 들어갈 수 있음
-
-반드시 JSON 배열만 반환. 마크다운, 설명, 백틱 금지. 형식:
-[{"name":"작업명","duration":30,"activeTime":2,"parallel":true,"startMin":0}, ...]
-
-다음 할 일 목록을 분석해서 최적 순서의 JSON 배열로 반환해주세요:
-${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
-
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
-
-      const res = await fetch(url, {
+    async function callGemini(apiKey, fullPrompt) {
+      const res = await fetch(GEMINI_URL(apiKey), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: fullPrompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            responseMimeType: 'application/json',
-          },
+          generationConfig: { temperature: 0.3, responseMimeType: 'application/json' },
         }),
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error?.message || `API 오류 (${res.status})`);
       }
-
       const data = await res.json();
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!content) throw new Error('AI 응답이 비어있어요');
+      return content;
+    }
 
-      // JSON 객체 안에 배열이 들어있을 수 있으니 유연하게 파싱
+    function parseTasks(content) {
       let parsed;
       try {
         parsed = JSON.parse(content);
         if (!Array.isArray(parsed)) {
-          // 객체에서 배열 필드 찾기
           const arrField = Object.values(parsed).find(v => Array.isArray(v));
-          if (arrField) parsed = arrField;
-          else throw new Error('JSON 배열 형식이 아니에요');
+          if (arrField) parsed = arrField; else throw new Error('JSON 배열 형식이 아니에요');
         }
-      } catch (e) {
-        throw new Error('AI 응답을 해석할 수 없어요. 다시 시도해주세요.');
-      }
-
-      // 검증 + ID 부여
+      } catch { throw new Error('AI 응답을 해석할 수 없어요. 다시 시도해주세요.'); }
       return parsed.map((t, i) => ({
-        id: Date.now() + i,
+        id: Date.now() + i + Math.floor(Math.random() * 1000),
         name: String(t.name || `작업 ${i+1}`),
         duration: Math.max(1, Number(t.duration) || 10),
         activeTime: Math.max(1, Math.min(Number(t.activeTime) || 10, Number(t.duration) || 10)),
@@ -178,169 +127,267 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
       }));
     }
 
-    // ========== API 키 입력 모달 ==========
+    const RULES_PROMPT = `규칙:
+- duration: 작업 총 시간(분)
+- activeTime: 손/주의를 직접 써야 하는 시간(분). duration 이하
+- parallel: activeTime < duration이면 true (예: 빨래는 2분 세팅 후 자동 → parallel: true)
+- 단독 집중 작업은 parallel: false, activeTime = duration
+- startMin: 시작 시점(분, 0부터)
+- parallel 작업의 대기시간 동안 다른 작업이 들어갈 수 있음. 짧은 active의 parallel을 먼저 시작
+반드시 JSON 배열만 반환. 마크다운/설명/백틱 금지.
+형식: [{"name":"작업명","duration":30,"activeTime":2,"parallel":true,"startMin":0}, ...]`;
+
+    async function analyzeTasks(rawText, apiKey, mode) {
+      const taskList = rawText.split('\n').map(s => s.trim()).filter(Boolean);
+      if (taskList.length === 0) throw new Error('할 일이 비어있어요');
+
+      let prompt;
+      if (mode === 'breakdown') {
+        prompt = `당신은 ADHD 친화적 일정 코치입니다. 사용자가 입력한 프로젝트나 큰 일을 ADHD가 있는 사람도 쉽게 따라할 수 있도록 5~12분 단위의 작은 단계로 잘게 쪼개세요.
+
+쪼개기 원칙:
+- 한 단계당 5~12분 (집중력 한계 고려). 너무 큰 단위 금지
+- 시작이 어려운 ADHD를 위해 첫 단계는 "준비물 꺼내기", "자료 열기" 같은 아주 작은 행동으로
+- 동사로 시작, 구체적으로 (애매한 "정리하기" X, "책상 위 종이 한 곳에 모으기" O)
+- 각 단계가 끝났을 때 "끝났다"는 게 명확해야 함
+
+${RULES_PROMPT}
+
+다음 일을 ADHD가 따라하기 쉬운 작은 단계들로 분해하고 정렬해서 JSON 배열로 반환:
+${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
+      } else {
+        prompt = `당신은 일정 최적화 전문가입니다. 할 일 목록을 분석해 각 작업의 소요시간과 병렬 가능 여부를 판단하고 최적 순서로 정렬합니다.
+
+${RULES_PROMPT}
+
+다음 할 일 목록을 분석해서 최적 순서의 JSON 배열로 반환:
+${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
+      }
+      return parseTasks(await callGemini(apiKey, prompt));
+    }
+
+    async function resortTasks(tasks, apiKey) {
+      const taskJson = tasks.map(t => ({
+        name: t.name, duration: t.duration, activeTime: t.activeTime, parallel: t.parallel, status: t.status,
+      }));
+      const prompt = `다음 작업들의 duration과 activeTime은 그대로 유지하고, parallel 가능 여부를 고려해 startMin만 다시 계산해서 최적 순서로 재정렬하세요.
+
+${RULES_PROMPT}
+
+작업 목록 (이름과 시간은 절대 변경하지 말 것):
+${JSON.stringify(taskJson, null, 2)}
+
+재정렬된 JSON 배열만 반환:`;
+
+      const parsed = parseTasks(await callGemini(apiKey, prompt));
+      // 기존 ID와 status 매핑 (이름으로 매칭)
+      return parsed.map((p) => {
+        const orig = tasks.find(t => t.name === p.name);
+        return orig ? { ...p, id: orig.id, status: orig.status } : p;
+      });
+    }
+
     function ApiKeyModal({ open, onClose, onSave, currentKey }) {
       const [value, setValue] = useState(currentKey || '');
       const [show, setShow] = useState(false);
-
       useEffect(() => { if (open) setValue(currentKey || ''); }, [open, currentKey]);
       if (!open) return null;
-
       return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <IconKey className="w-5 h-5 text-stone-700" />
-                <h2 className="text-base font-semibold">Google Gemini API 키 설정</h2>
+                <h2 className="text-base font-semibold">Gemini API 키 설정</h2>
               </div>
-              <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg">
-                <IconX className="w-4 h-4" />
-              </button>
+              <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg"><IconX className="w-4 h-4" /></button>
             </div>
-
             <p className="text-xs text-stone-500 mb-3 leading-relaxed">
-              AI 분석 기능을 쓰려면 Google Gemini API 키가 필요해요. <strong className="text-stone-700">무료</strong>로 발급받을 수 있고, 키는 이 브라우저에만 저장됩니다.
+              <strong className="text-stone-700">무료</strong>로 발급받을 수 있어요. 키는 이 브라우저에만 저장돼요.
               <br /><a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-emerald-600 underline mt-1 inline-block">무료 API 키 발급받기 →</a>
             </p>
-
             <div className="relative">
-              <input
-                type={show ? 'text' : 'password'}
-                value={value}
-                onChange={e => setValue(e.target.value)}
+              <input type={show ? 'text' : 'password'} value={value} onChange={e => setValue(e.target.value)}
                 placeholder="AIza..."
-                className="w-full px-3 py-2.5 pr-16 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 font-mono"
-              />
-              <button
-                onClick={() => setShow(!show)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-stone-500 px-2 py-1 hover:bg-stone-100 rounded"
-              >
-                {show ? '숨기기' : '보기'}
-              </button>
+                className="w-full px-3 py-2.5 pr-16 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 font-mono" />
+              <button onClick={() => setShow(!show)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-stone-500 px-2 py-1 hover:bg-stone-100 rounded">{show ? '숨기기' : '보기'}</button>
             </div>
-
             <div className="flex items-center gap-2 mt-4">
-              <button
-                onClick={onClose}
-                className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => { onSave(value.trim()); onClose(); }}
-                disabled={!value.trim()}
-                className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                저장
-              </button>
+              <button onClick={onClose} className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">취소</button>
+              <button onClick={() => { onSave(value.trim()); onClose(); }} disabled={!value.trim()}
+                className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800 disabled:opacity-40">저장</button>
             </div>
           </div>
         </div>
       );
     }
 
-    // ========== 작업 편집 모달 ==========
-    function EditTaskModal({ task, onClose, onSave }) {
+    function EditTaskModal({ task, onClose, onSave, onDelete }) {
       const [name, setName] = useState(task?.name || '');
       const [duration, setDuration] = useState(task?.duration || 10);
       const [activeTime, setActiveTime] = useState(task?.activeTime || 10);
       const [parallel, setParallel] = useState(task?.parallel || false);
+      const [askResort, setAskResort] = useState(false);
 
+      useEffect(() => {
+        if (task) {
+          setName(task.name); setDuration(task.duration);
+          setActiveTime(task.activeTime); setParallel(task.parallel);
+          setAskResort(false);
+        }
+      }, [task]);
       if (!task) return null;
 
-      const handleSave = () => {
+      const hasTimeChange = task && (Number(duration) !== task.duration || Number(activeTime) !== task.activeTime || parallel !== task.parallel);
+
+      const doSave = (resort) => {
         const d = Math.max(1, Number(duration) || 1);
         const a = Math.max(1, Math.min(Number(activeTime) || 1, d));
         onSave({
-          ...task,
-          name: name.trim() || '제목 없음',
+          ...task, name: name.trim() || '제목 없음',
           duration: d,
           activeTime: parallel ? a : d,
           parallel: parallel && a < d,
-        });
+        }, resort);
         onClose();
       };
 
+      const handleSave = () => { if (hasTimeChange) setAskResort(true); else doSave(false); };
+
       return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-          <div className="bg-white rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold">작업 수정</h2>
-              <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg">
-                <IconX className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-stone-700 block mb-1">작업명</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-stone-700 block mb-1">총 소요(분)</label>
-                  <input
-                    type="number" min="1"
-                    value={duration}
-                    onChange={e => setDuration(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900"
-                  />
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
+            {!askResort ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold">작업 수정</h2>
+                  <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg"><IconX className="w-4 h-4" /></button>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-stone-700 block mb-1">능동(분)</label>
-                  <input
-                    type="number" min="1"
-                    value={activeTime}
-                    onChange={e => setActiveTime(e.target.value)}
-                    disabled={!parallel}
-                    className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 disabled:bg-stone-50 disabled:text-stone-400"
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-stone-700 block mb-1">작업명</label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-stone-700 block mb-1">총 소요(분)</label>
+                      <input type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-stone-700 block mb-1">능동(분)</label>
+                      <input type="number" min="1" value={activeTime} onChange={e => setActiveTime(e.target.value)} disabled={!parallel}
+                        className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 disabled:bg-stone-50 disabled:text-stone-400" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 p-2.5 bg-stone-50 rounded-xl cursor-pointer">
+                    <input type="checkbox" checked={parallel} onChange={e => setParallel(e.target.checked)} className="w-4 h-4" />
+                    <span className="text-sm">병렬 가능 (대기 시간에 다른 일 가능)</span>
+                  </label>
                 </div>
-              </div>
-              <label className="flex items-center gap-2 p-2.5 bg-stone-50 rounded-xl cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={parallel}
-                  onChange={e => setParallel(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm">병렬 가능 (대기 시간에 다른 일 가능)</span>
-              </label>
-            </div>
-
-            <div className="flex items-center gap-2 mt-5">
-              <button
-                onClick={onClose}
-                className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800"
-              >
-                저장
-              </button>
-            </div>
+                <div className="flex items-center gap-2 mt-5">
+                  <button onClick={() => { onDelete(task.id); onClose(); }} className="px-3 py-2.5 text-xs text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-1">
+                    <IconTrash className="w-3.5 h-3.5" />삭제
+                  </button>
+                  <div className="flex-1" />
+                  <button onClick={onClose} className="px-4 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">취소</button>
+                  <button onClick={handleSave} className="px-4 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800">저장</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-base font-semibold mb-3">정말 시간을 조절하시겠습니까?</h2>
+                <p className="text-sm text-stone-600 mb-5 leading-relaxed">
+                  시간이 바뀌면 다른 작업들의 순서와 시작 시간도 함께 다시 정리해야 해요.<br />
+                  <span className="text-xs text-stone-400">AI 호출 1회가 추가로 사용됩니다.</span>
+                </p>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => doSave(false)} className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">이 작업만 변경</button>
+                  <button onClick={() => doSave(true)} className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800">AI로 재정렬하기</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       );
     }
 
-    // ========== 메인 앱 ==========
+    function FocusTimer({ task, onComplete, onStop }) {
+      const [running, setRunning] = useState(true);
+      const [secLeft, setSecLeft] = useState(task.duration * 60);
+      const [startedAt, setStartedAt] = useState(Date.now());
+      const totalSec = task.duration * 60;
+
+      useEffect(() => {
+        setSecLeft(task.duration * 60);
+        setStartedAt(Date.now());
+        setRunning(true);
+      }, [task.id]);
+
+      useEffect(() => {
+        if (!running) return;
+        const tick = () => {
+          const elapsed = (Date.now() - startedAt) / 1000;
+          const remaining = totalSec - elapsed;
+          if (remaining <= 0) { setSecLeft(0); }
+          else setSecLeft(remaining);
+        };
+        tick();
+        const id = setInterval(tick, 250);
+        return () => clearInterval(id);
+      }, [running, startedAt, totalSec]);
+
+      const progressPct = ((totalSec - secLeft) / totalSec) * 100;
+      const overdue = secLeft <= 0;
+
+      return (
+        <div className="bg-stone-900 text-white rounded-2xl p-5 sm:p-6 mb-4 relative overflow-hidden">
+          <div className="absolute inset-x-0 bottom-0 h-1.5 bg-stone-800">
+            <div className={`h-full transition-all duration-300 ${overdue ? 'bg-red-500' : 'bg-emerald-500'}`}
+              style={{ width: `${Math.min(100, progressPct)}%` }} />
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
+              <span className="text-xs uppercase tracking-wider text-stone-400">집중 중</span>
+            </div>
+            <button onClick={onStop} className="text-xs text-stone-400 hover:text-white px-2 py-1 hover:bg-stone-800 rounded">종료</button>
+          </div>
+          <div className="text-base sm:text-lg font-medium text-stone-100 mb-3 break-keep">{task.name}</div>
+          <div className="flex items-end justify-between">
+            <div className={`text-5xl sm:text-6xl font-bold font-mono-tabular tracking-tight ${overdue ? 'text-red-400' : 'text-white'}`}>
+              {formatCountdown(secLeft)}
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <button
+                onClick={() => {
+                  if (running) setRunning(false);
+                  else { setStartedAt(Date.now() - (totalSec - secLeft) * 1000); setRunning(true); }
+                }}
+                className="w-11 h-11 bg-white text-stone-900 rounded-full flex items-center justify-center hover:bg-stone-100">
+                {running ? <IconPauseBig className="w-5 h-5" /> : <IconPlayBig className="w-5 h-5 ml-0.5" />}
+              </button>
+              <button onClick={onComplete} className="w-11 h-11 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600">
+                <IconCheck className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          {overdue && (
+            <div className="mt-3 text-xs text-red-300">예정 시간이 지났어요. 완료 처리하거나 시간을 조정해보세요.</div>
+          )}
+        </div>
+      );
+    }
+
     function App() {
       const [apiKey, setApiKey] = useState(() => load(STORAGE.apiKey, ''));
       const [showApiKeyModal, setShowApiKeyModal] = useState(false);
       const [editTask, setEditTask] = useState(null);
 
-      const initialMeta = load(STORAGE.meta, { startMode: 'now', startTime: '09:00', view: 'timeline' });
+      const initialMeta = load(STORAGE.meta, { startMode: 'now', startTime: '09:00', view: 'timeline', mode: 'normal' });
       const [view, setView] = useState(initialMeta.view);
+      const [mode, setMode] = useState(initialMeta.mode || 'normal');
       const [startMode, setStartMode] = useState(initialMeta.startMode);
       const [startTime, setStartTime] = useState(initialMeta.startTime);
 
@@ -349,68 +396,85 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
 
-      // 자동 저장
       useEffect(() => { save(STORAGE.tasks, tasks); }, [tasks]);
-      useEffect(() => { save(STORAGE.meta, { startMode, startTime, view }); }, [startMode, startTime, view]);
+      useEffect(() => { save(STORAGE.meta, { startMode, startTime, view, mode }); }, [startMode, startTime, view, mode]);
       useEffect(() => { save(STORAGE.apiKey, apiKey); }, [apiKey]);
 
-      // 첫 방문이면 키 모달 안내
       useEffect(() => {
-        if (!apiKey) {
-          const timer = setTimeout(() => setShowApiKeyModal(true), 500);
-          return () => clearTimeout(timer);
-        }
+        if (!apiKey) { const t = setTimeout(() => setShowApiKeyModal(true), 500); return () => clearTimeout(t); }
       }, []);
 
-      const handleAnalyze = async () => {
-        if (!apiKey) { setShowApiKeyModal(true); return; }
-        if (!rawInput.trim()) { setError('할 일을 먼저 입력해주세요'); return; }
-
-        setLoading(true);
-        setError('');
-        try {
-          const result = await analyzeTasks(rawInput, apiKey);
-          setTasks(result);
-          setRawInput('');
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      // 긴 에러 메시지를 사용자 친화적으로 변환
       const friendlyError = (msg) => {
         if (!msg) return '';
-        if (msg.includes('quota') || msg.includes('Quota')) return '⏱️ API 사용 한도를 초과했어요. 잠시 후 다시 시도하거나 다른 키를 써주세요.';
-        if (msg.includes('API key') || msg.includes('API_KEY') || msg.includes('invalid')) return '🔑 API 키가 올바르지 않아요. 설정에서 다시 확인해주세요.';
+        if (msg.includes('quota') || msg.includes('Quota')) return '⏱️ API 사용 한도를 초과했어요.';
+        if (msg.includes('API key') || msg.includes('API_KEY') || msg.includes('invalid') || msg.includes('not found')) return '🔑 API 키나 모델에 문제가 있어요.';
         if (msg.includes('429')) return '⏱️ 너무 자주 요청했어요. 잠시 후 다시 시도해주세요.';
-        if (msg.includes('해석할 수 없')) return msg;
         if (msg.length > 120) return msg.slice(0, 120) + '...';
         return msg;
       };
 
+      const handleAnalyze = async () => {
+        if (!apiKey) { setShowApiKeyModal(true); return; }
+        if (!rawInput.trim()) { setError('할 일을 먼저 입력해주세요'); return; }
+        setLoading(true); setError('');
+        try {
+          const result = await analyzeTasks(rawInput, apiKey, mode);
+          setTasks(result); setRawInput('');
+        } catch (e) { setError(e.message); }
+        finally { setLoading(false); }
+      };
+
       const cycleStatus = (id) => {
-        setTasks(tasks.map(t => {
-          if (t.id !== id) return t;
+        setTasks(prev => prev.map(t => {
+          if (t.id !== id) {
+            const target = prev.find(p => p.id === id);
+            if (target && target.status === 'todo' && t.status === 'doing') return { ...t, status: 'todo' };
+            return t;
+          }
           const next = { todo: 'doing', doing: 'done', done: 'todo' }[t.status];
           return { ...t, status: next };
         }));
       };
 
       const removeTask = (id) => setTasks(tasks.filter(t => t.id !== id));
-      const updateTask = (updated) => setTasks(tasks.map(t => t.id === updated.id ? updated : t));
-      const clearAll = () => {
-        if (confirm('모든 일정을 지울까요?')) setTasks([]);
+
+      const updateTask = async (updated, resort) => {
+        const newTasks = tasks.map(t => t.id === updated.id ? updated : t);
+        if (resort && apiKey) {
+          setLoading(true); setError('');
+          try {
+            const resorted = await resortTasks(newTasks, apiKey);
+            setTasks(resorted);
+          } catch (e) { setError(e.message); setTasks(newTasks); }
+          finally { setLoading(false); }
+        } else { setTasks(newTasks); }
       };
+
+      const resizeDuration = async (taskId, newDuration) => {
+        const updated = tasks.map(t => {
+          if (t.id !== taskId) return t;
+          const newD = Math.max(1, newDuration);
+          return { ...t, duration: newD, activeTime: t.parallel ? Math.min(t.activeTime, newD) : newD };
+        });
+        if (!apiKey) { setTasks(updated); return; }
+        setLoading(true); setError('');
+        try {
+          const resorted = await resortTasks(updated, apiKey);
+          setTasks(resorted);
+        } catch (e) { setError(e.message); setTasks(updated); }
+        finally { setLoading(false); }
+      };
+
+      const clearAll = () => { if (confirm('모든 일정을 지울까요?')) setTasks([]); };
 
       const totalDuration = tasks.length === 0 ? 0 : Math.max(...tasks.map(t => t.startMin + t.duration));
       const baseTime = getBaseTime(startMode, startTime);
+      const activeTask = tasks.find(t => t.status === 'doing');
 
       const statusConfig = {
-        done:  { label: '완료',   Icon: IconCheck,  bar: 'bg-stone-300', text: 'text-stone-400 line-through', iconColor: 'text-stone-300' },
-        doing: { label: '진행중', Icon: IconPlay,   bar: 'bg-emerald-500', text: 'text-stone-900 font-medium', iconColor: 'text-emerald-500' },
-        todo:  { label: '예정',   Icon: IconCircle, bar: 'bg-stone-800', text: 'text-stone-700', iconColor: 'text-stone-400' },
+        done:  { Icon: IconCheck,  bar: 'bg-stone-300', text: 'text-stone-400 line-through', iconColor: 'text-stone-300' },
+        doing: { Icon: IconPlay,   bar: 'bg-emerald-500', text: 'text-stone-900 font-medium', iconColor: 'text-emerald-500' },
+        todo:  { Icon: IconCircle, bar: 'bg-stone-800', text: 'text-stone-700', iconColor: 'text-stone-400' },
       };
 
       const counts = {
@@ -421,7 +485,6 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
 
       return (
         <div className="min-h-screen bg-stone-50">
-          {/* 상단 네비 */}
           <nav className="bg-white border-b border-stone-200 sticky top-0 z-20">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -433,64 +496,64 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                   <div className="text-[10px] text-stone-400 leading-none mt-0.5">AI 일정 정리</div>
                 </div>
               </div>
-              <button
-                onClick={() => setShowApiKeyModal(true)}
-                className="p-2 hover:bg-stone-100 rounded-lg text-stone-600"
-                title="설정"
-              >
+              <button onClick={() => setShowApiKeyModal(true)} className="p-2 hover:bg-stone-100 rounded-lg text-stone-600">
                 <IconSettings className="w-4 h-4" />
               </button>
             </div>
           </nav>
 
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
-            {/* 안내 (키 없을 때) */}
             {!apiKey && (
               <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center justify-between gap-2">
                 <span>AI 분석을 쓰려면 Gemini API 키 설정이 필요해요. (무료)</span>
-                <button
-                  onClick={() => setShowApiKeyModal(true)}
-                  className="px-2.5 py-1 bg-amber-900 text-white rounded-md text-[11px] whitespace-nowrap"
-                >
-                  키 설정
-                </button>
+                <button onClick={() => setShowApiKeyModal(true)} className="px-2.5 py-1 bg-amber-900 text-white rounded-md text-[11px] whitespace-nowrap">키 설정</button>
               </div>
             )}
 
+            {activeTask && (
+              <FocusTimer
+                task={activeTask}
+                onComplete={() => cycleStatus(activeTask.id)}
+                onStop={() => setTasks(tasks.map(t => t.id === activeTask.id ? { ...t, status: 'todo' } : t))}
+              />
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
-              {/* 좌측: 입력 */}
               <section className="lg:col-span-2 bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-sm font-semibold text-stone-900">할 일 입력</h2>
                   <span className="text-xs text-stone-400">{rawInput.split('\n').filter(l => l.trim()).length}개</span>
                 </div>
-                <textarea
-                  value={rawInput}
-                  onChange={(e) => setRawInput(e.target.value)}
-                  placeholder={"줄바꿈으로 구분해서 입력하세요\n예: 밥 짓기\n냉장고 청소\n빨래 돌리기"}
-                  className="w-full h-36 sm:h-44 p-3 text-sm border border-stone-200 rounded-xl resize-none focus:outline-none focus:border-stone-900 bg-stone-50/50"
-                />
+
+                <div className="flex items-center gap-1 bg-stone-100 rounded-xl p-1 mb-3">
+                  <button onClick={() => setMode('normal')}
+                    className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition flex items-center justify-center gap-1 ${mode === 'normal' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
+                    <IconList className="w-3 h-3" />일반
+                  </button>
+                  <button onClick={() => setMode('breakdown')}
+                    className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition flex items-center justify-center gap-1 ${mode === 'breakdown' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
+                    <IconLayers className="w-3 h-3" />세분화
+                  </button>
+                </div>
+                {mode === 'breakdown' && (
+                  <p className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-2 rounded-lg mb-3 leading-relaxed">
+                    💡 큰 일이나 프로젝트를 입력하면 ADHD도 따라하기 쉬운 작은 단계로 잘게 쪼개드려요
+                  </p>
+                )}
+
+                <textarea value={rawInput} onChange={(e) => setRawInput(e.target.value)}
+                  placeholder={mode === 'breakdown' ? "큰 일을 한 줄로 적으세요\n예: 보고서 작성하기" : "줄바꿈으로 구분해서 입력\n예: 밥 짓기\n냉장고 청소\n빨래 돌리기"}
+                  className="w-full h-32 sm:h-40 p-3 text-sm border border-stone-200 rounded-xl resize-none focus:outline-none focus:border-stone-900 bg-stone-50/50" />
 
                 <div className="mt-4 space-y-2">
                   <label className="text-xs font-medium text-stone-700">시작 시간</label>
                   <div className="flex items-center gap-1 bg-stone-100 rounded-xl p-1">
-                    <button
-                      onClick={() => setStartMode('now')}
-                      className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'now' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}
-                    >지금 바로</button>
-                    <button
-                      onClick={() => setStartMode('scheduled')}
-                      className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'scheduled' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}
-                    >시간 지정</button>
+                    <button onClick={() => setStartMode('now')} className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'now' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>지금 바로</button>
+                    <button onClick={() => setStartMode('scheduled')} className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'scheduled' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>시간 지정</button>
                   </div>
                   {startMode === 'scheduled' && (
-                    <input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full mt-2 px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 box-border"
-                      style={{ minWidth: 0, maxWidth: '100%' }}
-                    />
+                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full mt-2 px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
                   )}
                 </div>
 
@@ -500,28 +563,22 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                   </div>
                 )}
 
-                <button
-                  onClick={handleAnalyze}
-                  disabled={loading || !rawInput.trim()}
-                  className="w-full mt-4 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-medium hover:bg-stone-800 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5"
-                >
-                  {loading ? <><IconLoader className="w-4 h-4 animate-spin" />분석 중…</> : <><IconSparkles className="w-4 h-4" />AI로 분석하기</>}
+                <button onClick={handleAnalyze} disabled={loading || !rawInput.trim()}
+                  className="w-full mt-4 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-medium hover:bg-stone-800 disabled:opacity-40 transition flex items-center justify-center gap-1.5">
+                  {loading ? <><IconLoader className="w-4 h-4" />분석 중…</> : <><IconSparkles className="w-4 h-4" />{mode === 'breakdown' ? 'AI로 세분화하기' : 'AI로 분석하기'}</>}
                 </button>
 
                 <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
                   <div className="flex items-center gap-2">
                     <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-emerald-500' : 'bg-stone-300'}`} />
-                    <span>{apiKey ? 'Gemini 2.5 Flash Lite 연결됨' : '키 미설정'}</span>
+                    <span>{apiKey ? 'Gemini 2.5 Flash Lite' : '키 미설정'}</span>
                   </div>
                   {tasks.length > 0 && (
-                    <button onClick={clearAll} className="text-stone-400 hover:text-red-600 transition">
-                      전체 삭제
-                    </button>
+                    <button onClick={clearAll} className="text-stone-400 hover:text-red-600">전체 삭제</button>
                   )}
                 </div>
               </section>
 
-              {/* 우측: 결과 */}
               <section className="lg:col-span-3 bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="min-w-0">
@@ -537,19 +594,16 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                   </div>
                   {tasks.length > 0 && (
                     <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
-                      <button
-                        onClick={() => setView('timeline')}
-                        className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'timeline' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}
-                      ><IconChart className="w-3.5 h-3.5" />타임라인</button>
-                      <button
-                        onClick={() => setView('checklist')}
-                        className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'checklist' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}
-                      ><IconList className="w-3.5 h-3.5" />체크리스트</button>
+                      <button onClick={() => setView('timeline')} className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'timeline' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
+                        <IconChart className="w-3.5 h-3.5" />타임라인
+                      </button>
+                      <button onClick={() => setView('checklist')} className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'checklist' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
+                        <IconList className="w-3.5 h-3.5" />체크리스트
+                      </button>
                     </div>
                   )}
                 </div>
 
-                {/* 빈 상태 */}
                 {tasks.length === 0 && (
                   <div className="py-12 text-center text-stone-400 text-sm">
                     <IconSparkles className="w-8 h-8 mx-auto mb-3 text-stone-300" />
@@ -558,136 +612,25 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
                   </div>
                 )}
 
-                {/* 타임라인 뷰 */}
                 {tasks.length > 0 && view === 'timeline' && (
-                  <div className="space-y-2.5">
-                    {/* 데스크톱 시간 눈금 */}
-                    <div className="hidden sm:block relative h-5 ml-28 mr-1">
-                      {[0, 0.25, 0.5, 0.75, 1].map((pct) => (
-                        <div key={pct} className="absolute top-0 text-[10px] text-stone-400" style={{ left: `${pct * 100}%`, transform: 'translateX(-50%)' }}>
-                          {formatTime(baseTime, Math.round(totalDuration * pct))}
-                        </div>
-                      ))}
-                    </div>
-                    {/* 모바일 시간 눈금 */}
-                    <div className="sm:hidden flex justify-between text-[10px] text-stone-400 px-1 mb-1">
-                      <span>{formatTime(baseTime, 0)}</span>
-                      <span>{formatTime(baseTime, Math.round(totalDuration / 2))}</span>
-                      <span>{formatTime(baseTime, totalDuration)}</span>
-                    </div>
-
-                    {tasks.map((task) => {
-                      const cfg = statusConfig[task.status];
-                      const leftPct = (task.startMin / totalDuration) * 100;
-                      const widthPct = (task.duration / totalDuration) * 100;
-                      const activePct = (task.activeTime / task.duration) * 100;
-
-                      return (
-                        <div key={task.id} className="group">
-                          {/* 모바일: 위에 작업명 */}
-                          <div className="sm:hidden flex items-center justify-between mb-1 px-1">
-                            <button onClick={() => cycleStatus(task.id)} className="flex items-center gap-1.5 min-w-0 flex-1">
-                              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
-                              <span className={`text-xs truncate ${cfg.text}`}>{task.name}</span>
-                              {task.parallel && <span className="text-[9px] text-emerald-600 font-medium shrink-0">⇅ 병렬</span>}
-                            </button>
-                            <button onClick={() => setEditTask(task)} className="text-[10px] text-stone-400 px-1.5 py-0.5 hover:text-stone-700">수정</button>
-                          </div>
-
-                          {/* 데스크톱: 가로 정렬 */}
-                          <div className="flex items-center gap-3">
-                            <button onClick={() => cycleStatus(task.id)} className="hidden sm:flex w-28 shrink-0 text-left text-sm items-center gap-1.5">
-                              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
-                              <span className={`truncate ${cfg.text}`}>{task.name}</span>
-                            </button>
-
-                            <div className="flex-1 relative h-7 bg-stone-100/70 rounded-md overflow-hidden">
-                              <div
-                                className={`absolute top-0 h-full rounded-md ${cfg.bar} ${task.status === 'done' ? 'opacity-40' : ''}`}
-                                style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-                              >
-                                {task.parallel && task.status !== 'done' && (
-                                  <div
-                                    className="absolute top-0 h-full bg-stone-900/70 rounded-l-md"
-                                    style={{ width: `${activePct}%` }}
-                                  />
-                                )}
-                                <span className="absolute inset-0 flex items-center px-2 text-[11px] sm:text-xs text-white font-medium">
-                                  {task.duration}분
-                                </span>
-                              </div>
-                              {task.parallel && (
-                                <span className="hidden sm:block absolute -top-1 text-[9px] text-emerald-600 font-medium" style={{ left: `${leftPct}%` }}>
-                                  ⇅ 병렬
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    <div className="flex flex-wrap items-center gap-3 pt-3 mt-3 border-t border-stone-100 text-[11px] text-stone-500">
-                      <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-900" />능동 시간</div>
-                      <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-300" />대기 (병렬 가능)</div>
-                      <div className="flex items-center gap-1.5"><IconPlay className="w-3 h-3 text-emerald-500" />진행중</div>
-                    </div>
-                  </div>
+                  <TimelineView
+                    tasks={tasks} totalDuration={totalDuration} baseTime={baseTime}
+                    statusConfig={statusConfig} onCycleStatus={cycleStatus} onEdit={setEditTask} onResize={resizeDuration}
+                  />
                 )}
 
-                {/* 체크리스트 뷰 */}
                 {tasks.length > 0 && view === 'checklist' && (
-                  <div className="space-y-2">
-                    {tasks.map((task, idx) => {
-                      const cfg = statusConfig[task.status];
-                      return (
-                        <div key={task.id} className="group flex items-center gap-3 p-3 rounded-xl border border-stone-100 hover:border-stone-200 hover:bg-stone-50/50 transition">
-                          <button onClick={() => cycleStatus(task.id)} className="shrink-0">
-                            <cfg.Icon className={`w-5 h-5 ${cfg.iconColor}`} />
-                          </button>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] text-stone-400 font-mono">#{idx + 1}</span>
-                              <span className={`text-sm ${cfg.text}`}>{task.name}</span>
-                              {task.parallel && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-medium">병렬</span>}
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-500 flex-wrap">
-                              <IconClock className="w-3 h-3" />
-                              <span>{formatTime(baseTime, task.startMin)} – {formatTime(baseTime, task.startMin + task.duration)}</span>
-                              <span className="text-stone-300">·</span>
-                              <span>{task.duration}분</span>
-                              {task.parallel && task.activeTime !== task.duration && (
-                                <><span className="text-stone-300">·</span><span>능동 {task.activeTime}분</span></>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button onClick={() => setEditTask(task)} className="px-2 py-1.5 text-xs text-stone-500 hover:bg-stone-100 rounded-lg" title="수정">수정</button>
-                            <button onClick={() => removeTask(task.id)} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="삭제">
-                              <IconTrash className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <ChecklistView
+                    tasks={tasks} baseTime={baseTime} statusConfig={statusConfig}
+                    onCycleStatus={cycleStatus} onEdit={setEditTask} onRemove={removeTask}
+                  />
                 )}
 
-                {/* 통계 */}
                 {tasks.length > 0 && (
                   <div className="mt-5 pt-4 border-t border-stone-100 grid grid-cols-3 gap-3 text-center">
-                    <div>
-                      <div className="text-lg font-bold text-stone-900">{counts.done}</div>
-                      <div className="text-[10px] text-stone-500 uppercase tracking-wider">완료</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-emerald-600">{counts.doing}</div>
-                      <div className="text-[10px] text-stone-500 uppercase tracking-wider">진행중</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-stone-900">{counts.todo}</div>
-                      <div className="text-[10px] text-stone-500 uppercase tracking-wider">예정</div>
-                    </div>
+                    <div><div className="text-lg font-bold text-stone-900">{counts.done}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">완료</div></div>
+                    <div><div className="text-lg font-bold text-emerald-600">{counts.doing}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">진행중</div></div>
+                    <div><div className="text-lg font-bold text-stone-900">{counts.todo}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">예정</div></div>
                   </div>
                 )}
               </section>
@@ -698,23 +641,191 @@ ${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
             </footer>
           </div>
 
-          <ApiKeyModal
-            open={showApiKeyModal}
-            onClose={() => setShowApiKeyModal(false)}
-            onSave={setApiKey}
-            currentKey={apiKey}
-          />
-          <EditTaskModal
-            task={editTask}
-            onClose={() => setEditTask(null)}
-            onSave={updateTask}
-          />
+          <ApiKeyModal open={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} onSave={setApiKey} currentKey={apiKey} />
+          <EditTaskModal task={editTask} onClose={() => setEditTask(null)} onSave={updateTask} onDelete={removeTask} />
+        </div>
+      );
+    }
+
+    function TimelineView({ tasks, totalDuration, baseTime, statusConfig, onCycleStatus, onEdit, onResize }) {
+      return (
+        <div className="space-y-3">
+          <div className="hidden sm:block relative h-5 ml-28 mr-1">
+            {[0, 0.25, 0.5, 0.75, 1].map((pct) => (
+              <div key={pct} className="absolute top-0 text-[10px] text-stone-400" style={{ left: `${pct * 100}%`, transform: 'translateX(-50%)' }}>
+                {formatTime(baseTime, Math.round(totalDuration * pct))}
+              </div>
+            ))}
+          </div>
+          <div className="sm:hidden flex justify-between text-[10px] text-stone-400 px-1 mb-1">
+            <span>{formatTime(baseTime, 0)}</span>
+            <span>{formatTime(baseTime, Math.round(totalDuration / 2))}</span>
+            <span>{formatTime(baseTime, totalDuration)}</span>
+          </div>
+
+          {tasks.map((task) => (
+            <TimelineRow key={task.id} task={task} totalDuration={totalDuration} baseTime={baseTime}
+              statusConfig={statusConfig} onCycleStatus={onCycleStatus} onEdit={onEdit} onResize={onResize} />
+          ))}
+
+          <div className="flex flex-wrap items-center gap-3 pt-3 mt-3 border-t border-stone-100 text-[11px] text-stone-500">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-900" />능동</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-300" />대기 (병렬)</div>
+            <div className="flex items-center gap-1.5 text-stone-400">⇄ 막대 끝 드래그로 시간 조절</div>
+          </div>
+        </div>
+      );
+    }
+
+    function TimelineRow({ task, totalDuration, baseTime, statusConfig, onCycleStatus, onEdit, onResize }) {
+      const cfg = statusConfig[task.status];
+      const barRef = useRef(null);
+      const [dragging, setDragging] = useState(false);
+      const [dragWidth, setDragWidth] = useState(null);
+      const startRef = useRef(null);
+
+      const effectiveDuration = dragWidth !== null ? dragWidth : task.duration;
+      const leftPct = (task.startMin / totalDuration) * 100;
+      const widthPct = (effectiveDuration / totalDuration) * 100;
+      const activePct = (task.activeTime / effectiveDuration) * 100;
+      const isBarTiny = widthPct < 12;
+
+      useEffect(() => {
+        if (!dragging) return;
+        const onMove = (e) => {
+          if (!startRef.current) return;
+          const x = e.touches ? e.touches[0].clientX : e.clientX;
+          const dx = x - startRef.current.startX;
+          const minDelta = Math.round(dx / startRef.current.pixelsPerMin);
+          const newD = Math.max(1, startRef.current.originalDuration + minDelta);
+          setDragWidth(newD);
+          if (e.touches) e.preventDefault();
+        };
+        const onUp = () => {
+          if (dragWidth !== null && dragWidth !== task.duration) onResize(dragWidth);
+          setDragging(false); setDragWidth(null); startRef.current = null;
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onUp);
+        return () => {
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+          window.removeEventListener('touchmove', onMove);
+          window.removeEventListener('touchend', onUp);
+        };
+      }, [dragging, dragWidth, task.duration, onResize]);
+
+      const startDrag = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const rect = barRef.current.getBoundingClientRect();
+        startRef.current = {
+          startX: x, originalDuration: task.duration,
+          pixelsPerMin: rect.width / totalDuration,
+        };
+        setDragging(true);
+      };
+
+      return (
+        <div className="group">
+          <div className="sm:hidden flex items-center justify-between mb-1 px-1">
+            <button onClick={() => onCycleStatus(task.id)} className="flex items-center gap-1.5 min-w-0 flex-1">
+              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
+              <span className={`text-xs truncate ${cfg.text}`}>{task.name}</span>
+              {task.parallel && <span className="text-[9px] text-emerald-600 font-medium shrink-0">⇅</span>}
+            </button>
+            <button onClick={() => onEdit(task)} className="text-[10px] text-stone-400 px-1.5 py-0.5 hover:text-stone-700">수정</button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={() => onCycleStatus(task.id)} className="hidden sm:flex w-28 shrink-0 text-left text-sm items-center gap-1.5">
+              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
+              <span className={`truncate ${cfg.text}`}>{task.name}</span>
+            </button>
+
+            <div ref={barRef} className="flex-1 relative h-8 bg-stone-100/70 rounded-md">
+              <div
+                onClick={() => !dragging && onEdit(task)}
+                className={`absolute top-0 h-full rounded-md ${cfg.bar} ${task.status === 'done' ? 'opacity-40' : ''} ${dragging ? 'ring-2 ring-emerald-400' : 'cursor-pointer'} transition-colors`}
+                style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+              >
+                {task.parallel && task.status !== 'done' && (
+                  <div className="absolute top-0 h-full bg-stone-900/70 rounded-l-md" style={{ width: `${activePct}%` }} />
+                )}
+                {!isBarTiny && (
+                  <span className="absolute inset-0 flex items-center px-2 text-[11px] sm:text-xs text-white font-medium pointer-events-none">
+                    {effectiveDuration}분
+                  </span>
+                )}
+                {task.status !== 'done' && (
+                  <div className="drag-handle absolute right-0 top-0 h-full w-4 -mr-2 flex items-center justify-center"
+                    onMouseDown={startDrag} onTouchStart={startDrag}>
+                    <div className="w-1 h-4 bg-white/70 rounded-full pointer-events-none" />
+                  </div>
+                )}
+              </div>
+              {isBarTiny && (
+                <span className="absolute top-1/2 -translate-y-1/2 text-[10px] sm:text-xs font-medium text-stone-700 pointer-events-none whitespace-nowrap"
+                  style={{ left: `calc(${leftPct + widthPct}% + 8px)` }}>
+                  {effectiveDuration}분
+                </span>
+              )}
+              {task.parallel && (
+                <span className="hidden sm:block absolute -top-1 text-[9px] text-emerald-600 font-medium" style={{ left: `${leftPct}%` }}>⇅ 병렬</span>
+              )}
+              {dragging && dragWidth !== null && (
+                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-[10px] px-2 py-0.5 rounded-md whitespace-nowrap z-10">
+                  {dragWidth}분
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ChecklistView({ tasks, baseTime, statusConfig, onCycleStatus, onEdit, onRemove }) {
+      return (
+        <div className="space-y-2">
+          {tasks.map((task, idx) => {
+            const cfg = statusConfig[task.status];
+            return (
+              <div key={task.id} className={`group flex items-center gap-3 p-3 rounded-xl border transition ${task.status === 'doing' ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-100 hover:border-stone-200 hover:bg-stone-50/50'}`}>
+                <button onClick={() => onCycleStatus(task.id)} className="shrink-0">
+                  <cfg.Icon className={`w-5 h-5 ${cfg.iconColor}`} />
+                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] text-stone-400 font-mono">#{idx + 1}</span>
+                    <span className={`text-sm ${cfg.text}`}>{task.name}</span>
+                    {task.parallel && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-medium">병렬</span>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-500 flex-wrap">
+                    <IconClock className="w-3 h-3" />
+                    <span>{formatTime(baseTime, task.startMin)} – {formatTime(baseTime, task.startMin + task.duration)}</span>
+                    <span className="text-stone-300">·</span>
+                    <span>{task.duration}분</span>
+                    {task.parallel && task.activeTime !== task.duration && (
+                      <><span className="text-stone-300">·</span><span>능동 {task.activeTime}분</span></>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => onEdit(task)} className="px-2 py-1.5 text-xs text-stone-500 hover:bg-stone-100 rounded-lg">수정</button>
+                  <button onClick={() => onRemove(task.id)} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                    <IconTrash className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       );
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
-
 </body>
 </html>
