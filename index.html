@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#fafaf9" />
+  <meta name="theme-color" content="#111827" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="LUPL Planner" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>LUPL Planner</title>
+  <title>LUPL Planner · 역산 준비 코치</title>
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231c1917'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%231c1917'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-family='sans-serif' font-size='100' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
-  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"LUPL Planner","short_name":"LUPL","description":"AI 일정 정리","start_url":"./","display":"standalone","background_color":"%23fafaf9","theme_color":"%23fafaf9","orientation":"portrait","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2738%27 fill=%27%231c1917%27/%3E%3Ctext x=%2796%27 y=%27135%27 text-anchor=%27middle%27 font-family=%27sans-serif%27 font-size=%27110%27 font-weight=%27bold%27 fill=%27white%27%3EL%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23111827'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-family='sans-serif' font-size='14' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23111827'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-family='sans-serif' font-size='100' font-weight='bold' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"LUPL Planner","short_name":"LUPL","description":"도착 시간 기준 역산 준비 코치","start_url":"./","display":"standalone","background_color":"%23fafaf9","theme_color":"%23111827","orientation":"portrait","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2738%27 fill=%27%23111827%27/%3E%3Ctext x=%2796%27 y=%27135%27 text-anchor=%27middle%27 font-family=%27sans-serif%27 font-size=%27110%27 font-weight=%27bold%27 fill=%27white%27%3EL%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
 
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,6 +21,8 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
+    :root { color-scheme: light; }
+    html, body { min-height: 100%; }
     body {
       font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       -webkit-tap-highlight-color: transparent;
@@ -28,802 +30,905 @@
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
+    input, textarea, select, button { font-family: inherit; }
     input, textarea, select { font-size: 16px; }
-    @media (min-width: 640px) { input, textarea, select { font-size: inherit; } }
-    input[type="time"] {
-      -webkit-appearance: none; appearance: none;
-      width: 100% !important; min-width: 0 !important; max-width: 100% !important;
-      box-sizing: border-box !important; display: block;
-    }
-    input[type="time"]::-webkit-date-and-time-value { text-align: left; min-width: 0; }
-    @keyframes softpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-    .pulse-dot { animation: softpulse 1.5s ease-in-out infinite; }
-    .drag-handle { cursor: ew-resize; touch-action: none; }
+    @media (min-width: 640px) { input, textarea, select { font-size: 14px; } }
+    input[type="time"], input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; }
     .font-mono-tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+    @keyframes softpulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    .pulse-dot { animation: softpulse 1.2s ease-in-out infinite; }
+    .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-stone-50">
+<body class="bg-stone-50 text-stone-950">
   <div id="root"></div>
 
   <script type="text/babel" data-presets="react">
-    const { useState, useEffect, useRef, useCallback } = React;
+    const { useEffect, useMemo, useRef, useState } = React;
 
-    const Icon = ({ d, className = "w-4 h-4", strokeWidth = 2, fill = "none" }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>{d}</svg>
-    );
-    const IconSparkles = (p) => <Icon {...p} d={<><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></>} />;
-    const IconClock = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
-    const IconCheck = (p) => <Icon {...p} d={<><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></>} />;
-    const IconCircle = (p) => <Icon {...p} d={<circle cx="12" cy="12" r="10"/>} />;
-    const IconPlay = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></>} />;
-    const IconPlayBig = (p) => <Icon {...p} d={<polygon points="6 3 20 12 6 21 6 3"/>} />;
-    const IconPauseBig = (p) => <Icon {...p} d={<><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>} />;
-    const IconList = (p) => <Icon {...p} d={<><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></>} />;
-    const IconChart = (p) => <Icon {...p} d={<><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/></>} />;
-    const IconX = (p) => <Icon {...p} d={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />;
-    const IconKey = (p) => <Icon {...p} d={<><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></>} />;
-    const IconSettings = (p) => <Icon {...p} d={<><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>} />;
-    const IconTrash = (p) => <Icon {...p} d={<><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>} />;
-    const IconLoader = (p) => <Icon {...p} d={<path d="M21 12a9 9 0 1 1-6.219-8.56"/>} className={(p.className || "w-4 h-4") + " animate-spin"} />;
-    const IconLayers = (p) => <Icon {...p} d={<><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></>} />;
-
-    const STORAGE = { apiKey: 'lupl_planner_api_key', tasks: 'lupl_planner_tasks', meta: 'lupl_planner_meta' };
-    const load = (key, fallback) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } };
-    const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
-
-    const formatTime = (baseDate, offsetMin) => {
-      const t = new Date(baseDate.getTime() + offsetMin * 60000);
-      return `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-    };
-    const getBaseTime = (mode, scheduledTime) => {
-      if (mode === 'now') return new Date();
-      const [h, m] = scheduledTime.split(':').map(Number);
-      const d = new Date(); d.setHours(h, m, 0, 0); return d;
-    };
-    const formatCountdown = (sec) => {
-      const s = Math.max(0, Math.floor(sec));
-      const m = Math.floor(s / 60); const r = s % 60;
-      return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+    const STORAGE = {
+      actions: 'lupl_reverse_action_presets_v1',
+      places: 'lupl_reverse_place_presets_v1',
+      plans: 'lupl_reverse_plans_v1',
+      settings: 'lupl_reverse_settings_v1',
     };
 
-    const GEMINI_URL = (apiKey) => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+    const DEFAULT_ACTIONS = [
+      { id: 1, name: '씻기', duration: 30, aliases: '샤워, 머리감기, 씻고 나오기', category: '준비', optional: false },
+      { id: 2, name: '옷 입기', duration: 10, aliases: '옷 고르기, 착장 정하기, 옷 갈아입기', category: '준비', optional: false },
+      { id: 3, name: '가방 챙기기', duration: 5, aliases: '짐 챙기기, 준비물 챙기기, 물건 챙기기', category: '준비', optional: false },
+      { id: 4, name: '화장하기', duration: 20, aliases: '메이크업, 얼굴 준비', category: '준비', optional: true },
+      { id: 5, name: '머리 말리기', duration: 10, aliases: '드라이, 머리 정리', category: '준비', optional: true },
+      { id: 6, name: '노트북 챙기기', duration: 3, aliases: '컴퓨터 챙기기, 충전기 챙기기', category: '준비물', optional: false },
+      { id: 7, name: '자료 확인', duration: 8, aliases: '회의자료 확인, 발표자료 확인, 파일 확인', category: '업무', optional: false },
+      { id: 8, name: '택시 부르기', duration: 5, aliases: '카카오택시, 택시 잡기', category: '이동 전', optional: false },
+      { id: 9, name: '문단속', duration: 3, aliases: '불 끄기, 문 잠그기, 창문 확인', category: '마무리', optional: false },
+      { id: 10, name: '신발 신기', duration: 3, aliases: '현관 준비, 나갈 준비', category: '마무리', optional: false },
+    ];
 
-    async function callGemini(apiKey, fullPrompt) {
-      const res = await fetch(GEMINI_URL(apiKey), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: fullPrompt }] }],
-          generationConfig: { temperature: 0.3, responseMimeType: 'application/json' },
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `API 오류 (${res.status})`);
-      }
-      const data = await res.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!content) throw new Error('AI 응답이 비어있어요');
-      return content;
-    }
+    const DEFAULT_PLACES = [
+      { id: 101, name: '러플 사무실', moveMin: 15, bufferMin: 10, transport: '차량' },
+      { id: 102, name: '대구시청', moveMin: 40, bufferMin: 15, transport: '차량' },
+      { id: 103, name: '광명학교', moveMin: 25, bufferMin: 15, transport: '차량' },
+      { id: 104, name: '이룸고', moveMin: 35, bufferMin: 20, transport: '차량' },
+      { id: 105, name: '동대구역', moveMin: 30, bufferMin: 20, transport: '차량' },
+    ];
 
-    function parseTasks(content) {
-      let parsed;
+    const SITUATIONS = [
+      { key: 'custom', label: '직접 입력', tasks: [] },
+      { key: 'meeting', label: '외부 회의', tasks: ['씻기', '옷 입기', '자료 확인', '노트북 챙기기', '가방 챙기기', '문단속', '신발 신기'] },
+      { key: 'class', label: '특수학교 수업', tasks: ['씻기', '옷 입기', '자료 확인', '노트북 챙기기', '가방 챙기기', '문단속', '신발 신기'] },
+      { key: 'presentation', label: '발표', tasks: ['씻기', '옷 입기', '발표자료 확인', '노트북 챙기기', '가방 챙기기', '문단속', '신발 신기'] },
+      { key: 'quick', label: '그냥 외출', tasks: ['씻기', '옷 입기', '가방 챙기기', '문단속', '신발 신기'] },
+    ];
+
+    const INTENSITIES = {
+      relaxed: { label: '여유 준비', short: '여유', factor: 1.15, bufferAdd: 10, removeOptional: false, desc: '평소보다 넉넉하게 잡아요.' },
+      normal: { label: '보통 준비', short: '보통', factor: 1, bufferAdd: 0, removeOptional: false, desc: '저장된 내 시간 기준이에요.' },
+      fast: { label: '빠른 준비', short: '빠름', factor: .7, bufferAdd: 0, removeOptional: false, desc: '시간을 줄여서 딱 맞춰요.' },
+      emergency: { label: '비상 준비', short: '비상', factor: .5, bufferAdd: -5, removeOptional: true, desc: '생략 가능한 일을 빼고 출발 중심으로 잡아요.' },
+    };
+
+    const load = (key, fallback) => {
       try {
-        parsed = JSON.parse(content);
-        if (!Array.isArray(parsed)) {
-          const arrField = Object.values(parsed).find(v => Array.isArray(v));
-          if (arrField) parsed = arrField; else throw new Error('JSON 배열 형식이 아니에요');
-        }
-      } catch { throw new Error('AI 응답을 해석할 수 없어요. 다시 시도해주세요.'); }
-      return parsed.map((t, i) => ({
-        id: Date.now() + i + Math.floor(Math.random() * 1000),
-        name: String(t.name || `작업 ${i+1}`),
-        duration: Math.max(1, Number(t.duration) || 10),
-        activeTime: Math.max(1, Math.min(Number(t.activeTime) || 10, Number(t.duration) || 10)),
-        parallel: Boolean(t.parallel),
-        startMin: Math.max(0, Number(t.startMin) || 0),
-        status: 'todo',
-      }));
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      } catch { return fallback; }
+    };
+    const save = (key, value) => {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    };
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatTime = (date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    const formatDateLabel = (date) => `${date.getMonth() + 1}월 ${date.getDate()}일`;
+    const addMin = (date, min) => new Date(date.getTime() + min * 60000);
+    const diffMin = (a, b) => Math.round((a.getTime() - b.getTime()) / 60000);
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const normalize = (s) => String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+    const uid = () => Date.now() + Math.floor(Math.random() * 1000000);
+    const todayISO = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+    const nowRoundedTime = () => {
+      const d = new Date();
+      d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0);
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    const minutesLabel = (min) => {
+      const v = Math.abs(Math.round(min));
+      if (v < 60) return `${v}분`;
+      return `${Math.floor(v / 60)}시간 ${v % 60}분`;
+    };
+    const countdownLabel = (sec) => {
+      const s = Math.max(0, Math.floor(sec));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const r = s % 60;
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(r)}` : `${pad(m)}:${pad(r)}`;
+    };
+
+    function matchActionPreset(text, actions) {
+      const n = normalize(text);
+      if (!n) return null;
+      return actions.find(p => {
+        const names = [p.name, ...(String(p.aliases || '').split(',').map(v => v.trim()).filter(Boolean))];
+        return names.some(name => {
+          const nn = normalize(name);
+          return nn && (n === nn || n.includes(nn) || nn.includes(n));
+        });
+      }) || null;
     }
 
-    const RULES_PROMPT = `규칙:
-- duration: 작업 총 시간(분)
-- activeTime: 손/주의를 직접 써야 하는 시간(분). duration 이하
-- parallel: activeTime < duration이면 true (예: 빨래는 2분 세팅 후 자동 → parallel: true)
-- 단독 집중 작업은 parallel: false, activeTime = duration
-- startMin: 시작 시점(분, 0부터)
-- parallel 작업의 대기시간 동안 다른 작업이 들어갈 수 있음. 짧은 active의 parallel을 먼저 시작
-반드시 JSON 배열만 반환. 마크다운/설명/백틱 금지.
-형식: [{"name":"작업명","duration":30,"activeTime":2,"parallel":true,"startMin":0}, ...]`;
-
-    async function analyzeTasks(rawText, apiKey, mode) {
-      const taskList = rawText.split('\n').map(s => s.trim()).filter(Boolean);
-      if (taskList.length === 0) throw new Error('할 일이 비어있어요');
-
-      let prompt;
-      if (mode === 'breakdown') {
-        prompt = `당신은 ADHD 친화적 일정 코치입니다. 사용자가 입력한 프로젝트나 큰 일을 ADHD가 있는 사람도 쉽게 따라할 수 있도록 5~12분 단위의 작은 단계로 잘게 쪼개세요.
-
-쪼개기 원칙:
-- 한 단계당 5~12분 (집중력 한계 고려). 너무 큰 단위 금지
-- 시작이 어려운 ADHD를 위해 첫 단계는 "준비물 꺼내기", "자료 열기" 같은 아주 작은 행동으로
-- 동사로 시작, 구체적으로 (애매한 "정리하기" X, "책상 위 종이 한 곳에 모으기" O)
-- 각 단계가 끝났을 때 "끝났다"는 게 명확해야 함
-
-${RULES_PROMPT}
-
-다음 일을 ADHD가 따라하기 쉬운 작은 단계들로 분해하고 정렬해서 JSON 배열로 반환:
-${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
-      } else {
-        prompt = `당신은 일정 최적화 전문가입니다. 할 일 목록을 분석해 각 작업의 소요시간과 병렬 가능 여부를 판단하고 최적 순서로 정렬합니다.
-
-${RULES_PROMPT}
-
-다음 할 일 목록을 분석해서 최적 순서의 JSON 배열로 반환:
-${taskList.map((t,i) => `${i+1}. ${t}`).join('\n')}`;
-      }
-      return parseTasks(await callGemini(apiKey, prompt));
+    function matchPlacePreset(text, places) {
+      const n = normalize(text);
+      if (!n) return null;
+      return places.find(p => {
+        const pn = normalize(p.name);
+        return pn && (n === pn || n.includes(pn) || pn.includes(n));
+      }) || null;
     }
 
-    async function resortTasks(tasks, apiKey) {
-      const taskJson = tasks.map(t => ({
-        name: t.name, duration: t.duration, activeTime: t.activeTime, parallel: t.parallel, status: t.status,
-      }));
-      const prompt = `다음 작업들의 duration과 activeTime은 그대로 유지하고, parallel 가능 여부를 고려해 startMin만 다시 계산해서 최적 순서로 재정렬하세요.
+    function parseTaskLines(raw, actions, intensityKey) {
+      const intensity = INTENSITIES[intensityKey] || INTENSITIES.normal;
+      const lines = String(raw || '')
+        .split(/[\n,，]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      const source = lines.length ? lines : ['씻기', '옷 입기', '가방 챙기기', '문단속', '신발 신기'];
 
-${RULES_PROMPT}
+      return source.map((line, index) => {
+        const minuteMatch = line.match(/(\d+)\s*분/);
+        const explicitDuration = minuteMatch ? Number(minuteMatch[1]) : null;
+        const cleanName = line.replace(/\d+\s*분/g, '').replace(/[()]/g, '').trim() || line.trim();
+        const preset = matchActionPreset(cleanName, actions);
+        const baseName = preset ? preset.name : cleanName;
+        const baseDuration = explicitDuration || preset?.duration || 10;
+        const optional = Boolean(preset?.optional);
+        if (intensity.removeOptional && optional) return null;
+        const factor = explicitDuration ? 1 : intensity.factor;
+        const duration = Math.max(1, Math.round(baseDuration * factor));
+        return {
+          id: uid() + index,
+          name: baseName,
+          raw: line,
+          duration,
+          baseDuration,
+          optional,
+          presetId: preset?.id || null,
+          status: 'todo',
+          start: null,
+          end: null,
+        };
+      }).filter(Boolean);
+    }
 
-작업 목록 (이름과 시간은 절대 변경하지 말 것):
-${JSON.stringify(taskJson, null, 2)}
-
-재정렬된 JSON 배열만 반환:`;
-
-      const parsed = parseTasks(await callGemini(apiKey, prompt));
-      // 기존 ID와 status 매핑 (이름으로 매칭)
-      return parsed.map((p) => {
-        const orig = tasks.find(t => t.name === p.name);
-        return orig ? { ...p, id: orig.id, status: orig.status } : p;
+    function dedupeTasks(tasks) {
+      const seen = new Set();
+      return tasks.filter(t => {
+        const k = normalize(t.name);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
       });
     }
 
-    function ApiKeyModal({ open, onClose, onSave, currentKey }) {
-      const [value, setValue] = useState(currentKey || '');
-      const [show, setShow] = useState(false);
-      useEffect(() => { if (open) setValue(currentKey || ''); }, [open, currentKey]);
-      if (!open) return null;
-      return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <IconKey className="w-5 h-5 text-stone-700" />
-                <h2 className="text-base font-semibold">Gemini API 키 설정</h2>
-              </div>
-              <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg"><IconX className="w-4 h-4" /></button>
-            </div>
-            <p className="text-xs text-stone-500 mb-3 leading-relaxed">
-              <strong className="text-stone-700">무료</strong>로 발급받을 수 있어요. 키는 이 브라우저에만 저장돼요.
-              <br /><a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-emerald-600 underline mt-1 inline-block">무료 API 키 발급받기 →</a>
-            </p>
-            <div className="relative">
-              <input type={show ? 'text' : 'password'} value={value} onChange={e => setValue(e.target.value)}
-                placeholder="AIza..."
-                className="w-full px-3 py-2.5 pr-16 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 font-mono" />
-              <button onClick={() => setShow(!show)} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-stone-500 px-2 py-1 hover:bg-stone-100 rounded">{show ? '숨기기' : '보기'}</button>
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <button onClick={onClose} className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">취소</button>
-              <button onClick={() => { onSave(value.trim()); onClose(); }} disabled={!value.trim()}
-                className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800 disabled:opacity-40">저장</button>
-            </div>
-          </div>
-        </div>
-      );
+    function recalcPlan(plan, tasksOverride) {
+      const tasks = (tasksOverride || plan.tasks).map(t => ({ ...t }));
+      const prepTotal = tasks.reduce((sum, t) => sum + Number(t.duration || 0), 0);
+      const arrival = new Date(plan.arrivalAt);
+      const departureDeadline = addMin(arrival, -(Number(plan.moveMin || 0) + Number(plan.bufferMin || 0)));
+      const prepStart = addMin(departureDeadline, -prepTotal);
+      let cursor = new Date(prepStart);
+      const timedTasks = tasks.map(t => {
+        const start = new Date(cursor);
+        const end = addMin(start, Number(t.duration || 0));
+        cursor = new Date(end);
+        return { ...t, start: start.toISOString(), end: end.toISOString() };
+      });
+      return {
+        ...plan,
+        tasks: timedTasks,
+        prepTotal,
+        prepStart: prepStart.toISOString(),
+        departureDeadline: departureDeadline.toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
     }
 
-    function EditTaskModal({ task, onClose, onSave, onDelete }) {
-      const [name, setName] = useState(task?.name || '');
-      const [duration, setDuration] = useState(task?.duration || 10);
-      const [activeTime, setActiveTime] = useState(task?.activeTime || 10);
-      const [parallel, setParallel] = useState(task?.parallel || false);
-      const [askResort, setAskResort] = useState(false);
+    function createPlan({ arrivalDate, arrivalTime, place, transport, moveMin, bufferMin, prepText, intensityKey, actions }) {
+      const arrival = new Date(`${arrivalDate}T${arrivalTime || '09:00'}:00`);
+      const intensity = INTENSITIES[intensityKey] || INTENSITIES.normal;
+      const rawBuffer = Number(bufferMin || 0) + intensity.bufferAdd;
+      const safeBuffer = Math.max(0, rawBuffer);
+      const tasks = dedupeTasks(parseTaskLines(prepText, actions, intensityKey));
+      const base = {
+        id: uid(),
+        title: `${place || '외출'} · ${formatDateLabel(arrival)} ${formatTime(arrival)}`,
+        place: place || '장소 미정',
+        transport: transport || '직접 입력',
+        moveMin: Math.max(0, Number(moveMin || 0)),
+        bufferMin: safeBuffer,
+        intensityKey,
+        arrivalAt: arrival.toISOString(),
+        tasks,
+        createdAt: new Date().toISOString(),
+      };
+      return recalcPlan(base);
+    }
 
-      useEffect(() => {
-        if (task) {
-          setName(task.name); setDuration(task.duration);
-          setActiveTime(task.activeTime); setParallel(task.parallel);
-          setAskResort(false);
-        }
-      }, [task]);
-      if (!task) return null;
+    function getRisk(plan, now = new Date()) {
+      const arrival = new Date(plan.arrivalAt);
+      const prepStart = new Date(plan.prepStart);
+      const departure = new Date(plan.departureDeadline);
+      const missing = Number(plan.prepTotal || 0) + Number(plan.moveMin || 0) + Number(plan.bufferMin || 0) - diffMin(arrival, now);
+      if (now > arrival) {
+        return { level: 'past', label: '이미 지난 일정이에요', detail: '새 일정으로 다시 계산해보세요.', color: 'bg-stone-900 text-white', missing };
+      }
+      if (now <= prepStart) {
+        return { level: 'safe', label: '아직 여유 있어요', detail: `${minutesLabel(diffMin(prepStart, now))} 뒤에 준비를 시작하면 돼요.`, color: 'bg-emerald-50 text-emerald-800 border-emerald-200', missing };
+      }
+      if (now <= departure) {
+        return { level: 'tight', label: '지금 시작하면 딱 맞아요', detail: '새 일을 시작하지 말고 바로 첫 단계로 가는 게 좋아요.', color: 'bg-amber-50 text-amber-800 border-amber-200', missing };
+      }
+      return { level: 'danger', label: `${minutesLabel(missing)} 부족해요`, detail: '빠른 준비나 비상 준비로 줄일 수 있는 항목을 먼저 정해요.', color: 'bg-red-50 text-red-800 border-red-200', missing };
+    }
 
-      const hasTimeChange = task && (Number(duration) !== task.duration || Number(activeTime) !== task.activeTime || parallel !== task.parallel);
+    function Icon({ children, className = 'w-4 h-4' }) {
+      return <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>;
+    }
+    const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
+    const IconCheck = (p) => <Icon {...p}><path d="M20 6 9 17l-5-5"/></Icon>;
+    const IconPlay = (p) => <Icon {...p}><polygon points="6 3 20 12 6 21 6 3"/></Icon>;
+    const IconPause = (p) => <Icon {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></Icon>;
+    const IconPlus = (p) => <Icon {...p}><path d="M12 5v14"/><path d="M5 12h14"/></Icon>;
+    const IconTrash = (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></Icon>;
+    const IconX = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
+    const IconEdit = (p) => <Icon {...p}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></Icon>;
 
-      const doSave = (resort) => {
-        const d = Math.max(1, Number(duration) || 1);
-        const a = Math.max(1, Math.min(Number(activeTime) || 1, d));
-        onSave({
-          ...task, name: name.trim() || '제목 없음',
-          duration: d,
-          activeTime: parallel ? a : d,
-          parallel: parallel && a < d,
-        }, resort);
-        onClose();
+    function App() {
+      const [actions, setActions] = useState(() => load(STORAGE.actions, DEFAULT_ACTIONS));
+      const [places, setPlaces] = useState(() => load(STORAGE.places, DEFAULT_PLACES));
+      const [plans, setPlans] = useState(() => load(STORAGE.plans, []));
+      const [tab, setTab] = useState('prepare');
+      const [currentPlan, setCurrentPlan] = useState(null);
+      const [focusPlan, setFocusPlan] = useState(null);
+      const [editTask, setEditTask] = useState(null);
+      const [toast, setToast] = useState('');
+
+      useEffect(() => save(STORAGE.actions, actions), [actions]);
+      useEffect(() => save(STORAGE.places, places), [places]);
+      useEffect(() => save(STORAGE.plans, plans.slice(0, 30)), [plans]);
+
+      const savePlan = (plan) => {
+        setPlans(prev => [plan, ...prev.filter(p => p.id !== plan.id)].slice(0, 30));
       };
 
-      const handleSave = () => { if (hasTimeChange) setAskResort(true); else doSave(false); };
+      const openPlan = (plan) => {
+        setCurrentPlan(plan);
+        setTab('prepare');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const updateCurrentPlan = (plan) => {
+        setCurrentPlan(plan);
+        savePlan(plan);
+      };
+
+      const applyEmergencyMode = () => {
+        if (!currentPlan) return;
+        const prepText = currentPlan.tasks.map(t => t.name).join('\n');
+        const plan = createPlan({
+          arrivalDate: currentPlan.arrivalAt.slice(0, 10),
+          arrivalTime: formatTime(new Date(currentPlan.arrivalAt)),
+          place: currentPlan.place,
+          transport: currentPlan.transport,
+          moveMin: currentPlan.moveMin,
+          bufferMin: Math.max(0, currentPlan.bufferMin),
+          prepText,
+          intensityKey: 'emergency',
+          actions,
+        });
+        updateCurrentPlan(plan);
+        setToast('비상 준비로 다시 계산했어요.');
+      };
+
+      const updateTaskDuration = (task, duration, remember) => {
+        if (!currentPlan) return;
+        const newTasks = currentPlan.tasks.map(t => t.id === task.id ? { ...t, duration: Math.max(1, Number(duration || 1)), status: 'todo' } : t);
+        const plan = recalcPlan(currentPlan, newTasks);
+        updateCurrentPlan(plan);
+        setEditTask(null);
+
+        if (remember) {
+          const matched = task.presetId ? actions.find(a => a.id === task.presetId) : matchActionPreset(task.name, actions);
+          if (matched) {
+            setActions(prev => prev.map(a => a.id === matched.id ? { ...a, duration: Math.max(1, Number(duration || 1)) } : a));
+          } else {
+            setActions(prev => [{ id: uid(), name: task.name, duration: Math.max(1, Number(duration || 1)), aliases: '', category: '준비', optional: false }, ...prev]);
+          }
+          setToast(`앞으로 '${task.name}'은 ${duration}분으로 기억할게요.`);
+        } else {
+          setToast('이번 일정에만 적용했어요.');
+        }
+      };
 
       return (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6" onClick={e => e.stopPropagation()}>
-            {!askResort ? (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold">작업 수정</h2>
-                  <button onClick={onClose} className="p-1 hover:bg-stone-100 rounded-lg"><IconX className="w-4 h-4" /></button>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-medium text-stone-700 block mb-1">작업명</label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-stone-700 block mb-1">총 소요(분)</label>
-                      <input type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-stone-700 block mb-1">능동(분)</label>
-                      <input type="number" min="1" value={activeTime} onChange={e => setActiveTime(e.target.value)} disabled={!parallel}
-                        className="w-full px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900 disabled:bg-stone-50 disabled:text-stone-400" />
-                    </div>
-                  </div>
-                  <label className="flex items-center gap-2 p-2.5 bg-stone-50 rounded-xl cursor-pointer">
-                    <input type="checkbox" checked={parallel} onChange={e => setParallel(e.target.checked)} className="w-4 h-4" />
-                    <span className="text-sm">병렬 가능 (대기 시간에 다른 일 가능)</span>
-                  </label>
-                </div>
-                <div className="flex items-center gap-2 mt-5">
-                  <button onClick={() => { onDelete(task.id); onClose(); }} className="px-3 py-2.5 text-xs text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-1">
-                    <IconTrash className="w-3.5 h-3.5" />삭제
-                  </button>
-                  <div className="flex-1" />
-                  <button onClick={onClose} className="px-4 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">취소</button>
-                  <button onClick={handleSave} className="px-4 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800">저장</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-base font-semibold mb-3">정말 시간을 조절하시겠습니까?</h2>
-                <p className="text-sm text-stone-600 mb-5 leading-relaxed">
-                  시간이 바뀌면 다른 작업들의 순서와 시작 시간도 함께 다시 정리해야 해요.<br />
-                  <span className="text-xs text-stone-400">AI 호출 1회가 추가로 사용됩니다.</span>
-                </p>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => doSave(false)} className="flex-1 py-2.5 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">이 작업만 변경</button>
-                  <button onClick={() => doSave(true)} className="flex-1 py-2.5 text-sm bg-stone-900 text-white rounded-xl hover:bg-stone-800">AI로 재정렬하기</button>
-                </div>
-              </>
+        <div className="min-h-screen pb-24 sm:pb-8">
+          <Header />
+          <main className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+            {tab === 'prepare' && (
+              <PreparePage
+                actions={actions}
+                places={places}
+                currentPlan={currentPlan}
+                onPlan={plan => { setCurrentPlan(plan); savePlan(plan); }}
+                onStartFocus={async (plan) => {
+                  try { await document.documentElement.requestFullscreen?.(); } catch {}
+                  setFocusPlan(plan);
+                }}
+                onSavePlace={(place) => { setPlaces(prev => [{ ...place, id: uid() }, ...prev]); setToast(`'${place.name}' 장소를 저장했어요.`); }}
+                onEditTask={setEditTask}
+                onEmergency={applyEmergencyMode}
+              />
             )}
-          </div>
+            {tab === 'plans' && <PlansPage plans={plans} onOpen={openPlan} onDelete={(id) => setPlans(prev => prev.filter(p => p.id !== id))} />}
+            {tab === 'presets' && <PresetsPage actions={actions} setActions={setActions} places={places} setPlaces={setPlaces} />}
+          </main>
+
+          <BottomNav tab={tab} setTab={setTab} />
+          {focusPlan && <FocusMode initialPlan={focusPlan} onClose={() => setFocusPlan(null)} onUpdatePlan={updateCurrentPlan} />}
+          {editTask && <TaskEditModal task={editTask} onClose={() => setEditTask(null)} onSave={updateTaskDuration} />}
+          {toast && <Toast text={toast} onClose={() => setToast('')} />}
         </div>
       );
     }
 
-    function FocusTimer({ task, onComplete, onStop }) {
-      const [running, setRunning] = useState(true);
-      const [secLeft, setSecLeft] = useState(task.duration * 60);
-      const [startedAt, setStartedAt] = useState(Date.now());
-      const totalSec = task.duration * 60;
+    function Header() {
+      return (
+        <header className="sticky top-0 z-30 bg-stone-50/90 backdrop-blur border-b border-stone-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-stone-950 text-white flex items-center justify-center font-bold">L</div>
+              <div>
+                <div className="text-sm font-bold tracking-tight">LUPL Planner</div>
+                <div className="text-[11px] text-stone-500">역산 준비 코치</div>
+              </div>
+            </div>
+            <div className="hidden sm:block text-xs text-stone-500">도착 시간만 입력하면 준비 시작 시간을 계산해요</div>
+          </div>
+        </header>
+      );
+    }
+
+    function BottomNav({ tab, setTab }) {
+      const items = [
+        { key: 'prepare', label: '준비' },
+        { key: 'plans', label: '일정' },
+        { key: 'presets', label: '내 시간' },
+      ];
+      return (
+        <nav className="fixed sm:static bottom-0 left-0 right-0 z-30 bg-white border-t border-stone-200 safe-bottom sm:py-0">
+          <div className="max-w-5xl mx-auto grid grid-cols-3 sm:flex sm:justify-center sm:gap-2 px-2 sm:px-6 py-2">
+            {items.map(item => (
+              <button key={item.key} onClick={() => setTab(item.key)} className={`py-2.5 sm:px-5 rounded-2xl text-sm font-medium transition ${tab === item.key ? 'bg-stone-950 text-white' : 'text-stone-500 hover:bg-stone-100'}`}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+      );
+    }
+
+    function PreparePage({ actions, places, currentPlan, onPlan, onStartFocus, onSavePlace, onEditTask, onEmergency }) {
+      const [arrivalDate, setArrivalDate] = useState(todayISO());
+      const [arrivalTime, setArrivalTime] = useState(nowRoundedTime());
+      const [place, setPlace] = useState('');
+      const [transport, setTransport] = useState('차량');
+      const [moveMin, setMoveMin] = useState(30);
+      const [bufferMin, setBufferMin] = useState(15);
+      const [situation, setSituation] = useState('quick');
+      const [prepText, setPrepText] = useState('씻기\n옷 입기\n가방 챙기기\n문단속\n신발 신기');
+      const [intensityKey, setIntensityKey] = useState('normal');
+      const [showAll, setShowAll] = useState(false);
 
       useEffect(() => {
-        setSecLeft(task.duration * 60);
-        setStartedAt(Date.now());
-        setRunning(true);
-      }, [task.id]);
+        const matched = matchPlacePreset(place, places);
+        if (matched) {
+          setMoveMin(matched.moveMin);
+          setBufferMin(matched.bufferMin);
+          setTransport(matched.transport || '차량');
+        }
+      }, [place]);
 
-      useEffect(() => {
-        if (!running) return;
-        const tick = () => {
-          const elapsed = (Date.now() - startedAt) / 1000;
-          const remaining = totalSec - elapsed;
-          if (remaining <= 0) { setSecLeft(0); }
-          else setSecLeft(remaining);
-        };
-        tick();
-        const id = setInterval(tick, 250);
-        return () => clearInterval(id);
-      }, [running, startedAt, totalSec]);
+      const applySituation = (key) => {
+        setSituation(key);
+        const found = SITUATIONS.find(s => s.key === key);
+        if (found && found.tasks.length) setPrepText(found.tasks.join('\n'));
+      };
 
-      const progressPct = ((totalSec - secLeft) / totalSec) * 100;
-      const overdue = secLeft <= 0;
+      const handleCreate = () => {
+        const plan = createPlan({ arrivalDate, arrivalTime, place, transport, moveMin, bufferMin, prepText, intensityKey, actions });
+        onPlan(plan);
+        setShowAll(false);
+      };
+
+      const matchedPlace = matchPlacePreset(place, places);
+      const canSavePlace = place.trim() && !matchedPlace;
 
       return (
-        <div className="bg-stone-900 text-white rounded-2xl p-5 sm:p-6 mb-4 relative overflow-hidden">
-          <div className="absolute inset-x-0 bottom-0 h-1.5 bg-stone-800">
-            <div className={`h-full transition-all duration-300 ${overdue ? 'bg-red-500' : 'bg-emerald-500'}`}
-              style={{ width: `${Math.min(100, progressPct)}%` }} />
-          </div>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
-              <span className="text-xs uppercase tracking-wider text-stone-400">집중 중</span>
+        <div className="space-y-4 sm:space-y-6">
+          <section className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+            <div className="mb-5">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight break-keep">몇 시까지 도착해야 하나요?</h1>
+              <p className="text-sm text-stone-500 mt-2">씻기·이동·여유시간까지 거꾸로 계산해서 준비 시작 시간을 잡아요.</p>
             </div>
-            <button onClick={onStop} className="text-xs text-stone-400 hover:text-white px-2 py-1 hover:bg-stone-800 rounded">종료</button>
-          </div>
-          <div className="text-base sm:text-lg font-medium text-stone-100 mb-3 break-keep">{task.name}</div>
-          <div className="flex items-end justify-between">
-            <div className={`text-5xl sm:text-6xl font-bold font-mono-tabular tracking-tight ${overdue ? 'text-red-400' : 'text-white'}`}>
-              {formatCountdown(secLeft)}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="도착 날짜">
+                <input type="date" value={arrivalDate} onChange={e => setArrivalDate(e.target.value)} className="input" />
+              </Field>
+              <Field label="도착 시간">
+                <input type="time" value={arrivalTime} onChange={e => setArrivalTime(e.target.value)} className="input text-xl font-bold font-mono-tabular" />
+              </Field>
+              <Field label="어디로 가나요?">
+                <input value={place} onChange={e => setPlace(e.target.value)} placeholder="예: 대구시청, 이룸고" className="input" />
+                {matchedPlace && <div className="mt-1 text-xs text-emerald-700">저장된 장소: 이동 {matchedPlace.moveMin}분 · 여유 {matchedPlace.bufferMin}분</div>}
+              </Field>
+              <Field label="이동 / 여유 시간">
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="number" min="0" value={moveMin} onChange={e => setMoveMin(e.target.value)} className="input" placeholder="이동 분" />
+                  <input type="number" min="0" value={bufferMin} onChange={e => setBufferMin(e.target.value)} className="input" placeholder="여유 분" />
+                </div>
+              </Field>
             </div>
-            <div className="flex items-center gap-2 mb-1">
-              <button
-                onClick={() => {
-                  if (running) setRunning(false);
-                  else { setStartedAt(Date.now() - (totalSec - secLeft) * 1000); setRunning(true); }
-                }}
-                className="w-11 h-11 bg-white text-stone-900 rounded-full flex items-center justify-center hover:bg-stone-100">
-                {running ? <IconPauseBig className="w-5 h-5" /> : <IconPlayBig className="w-5 h-5 ml-0.5" />}
-              </button>
-              <button onClick={onComplete} className="w-11 h-11 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600">
-                <IconCheck className="w-5 h-5" />
-              </button>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="상황 프리셋">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {SITUATIONS.map(s => (
+                    <button key={s.key} onClick={() => applySituation(s.key)} className={`shrink-0 px-3 py-2 rounded-2xl text-sm border ${situation === s.key ? 'bg-stone-950 text-white border-stone-950' : 'bg-white text-stone-600 border-stone-200'}`}>{s.label}</button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="준비 강도">
+                <div className="grid grid-cols-4 gap-1 bg-stone-100 rounded-2xl p-1">
+                  {Object.entries(INTENSITIES).map(([key, info]) => (
+                    <button key={key} onClick={() => setIntensityKey(key)} className={`py-2 rounded-xl text-xs font-semibold ${intensityKey === key ? 'bg-white shadow-sm text-stone-950' : 'text-stone-500'}`}>{info.short}</button>
+                  ))}
+                </div>
+                <div className="text-xs text-stone-500 mt-1">{INTENSITIES[intensityKey].desc}</div>
+              </Field>
             </div>
-          </div>
-          {overdue && (
-            <div className="mt-3 text-xs text-red-300">예정 시간이 지났어요. 완료 처리하거나 시간을 조정해보세요.</div>
+
+            <Field label="준비할 일" className="mt-4">
+              <textarea value={prepText} onChange={e => setPrepText(e.target.value)} rows="5" className="input min-h-32 resize-none" placeholder="예: 씻기, 옷 입기, 가방 챙기기" />
+              <div className="mt-2 text-xs text-stone-500">한 줄씩 쓰거나 쉼표로 구분하세요. “씻기 30분”처럼 시간을 직접 써도 됩니다.</div>
+            </Field>
+
+            <button onClick={handleCreate} className="mt-5 w-full bg-stone-950 text-white py-4 rounded-2xl font-bold text-base active:scale-[.99] transition flex items-center justify-center gap-2">
+              <IconClock className="w-5 h-5" /> 거꾸로 계산하기
+            </button>
+          </section>
+
+          {currentPlan && (
+            <PlanResult
+              plan={currentPlan}
+              showAll={showAll}
+              setShowAll={setShowAll}
+              onStartFocus={onStartFocus}
+              onSavePlace={canSavePlace ? () => onSavePlace({ name: place.trim(), moveMin: Number(moveMin || 0), bufferMin: Number(bufferMin || 0), transport }) : null}
+              onEditTask={onEditTask}
+              onEmergency={onEmergency}
+            />
           )}
         </div>
       );
     }
 
-    function App() {
-      const [apiKey, setApiKey] = useState(() => load(STORAGE.apiKey, ''));
-      const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-      const [editTask, setEditTask] = useState(null);
+    function Field({ label, children, className = '' }) {
+      return <label className={`block ${className}`}><div className="text-xs font-bold text-stone-700 mb-1.5">{label}</div>{children}</label>;
+    }
 
-      const initialMeta = load(STORAGE.meta, { startMode: 'now', startTime: '09:00', view: 'timeline', mode: 'normal' });
-      const [view, setView] = useState(initialMeta.view);
-      const [mode, setMode] = useState(initialMeta.mode || 'normal');
-      const [startMode, setStartMode] = useState(initialMeta.startMode);
-      const [startTime, setStartTime] = useState(initialMeta.startTime);
+    function PlanResult({ plan, showAll, setShowAll, onStartFocus, onSavePlace, onEditTask, onEmergency }) {
+      const risk = getRisk(plan);
+      const arrival = new Date(plan.arrivalAt);
+      const prepStart = new Date(plan.prepStart);
+      const departure = new Date(plan.departureDeadline);
+      const firstTask = plan.tasks.find(t => t.status !== 'done') || plan.tasks[0];
 
-      const [rawInput, setRawInput] = useState('');
-      const [tasks, setTasks] = useState(() => load(STORAGE.tasks, []));
-      const [loading, setLoading] = useState(false);
-      const [error, setError] = useState('');
+      return (
+        <section className="bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="p-5 sm:p-6 bg-stone-950 text-white">
+            <div className="text-xs text-stone-400 mb-2">출발 마감선</div>
+            <div className="text-3xl sm:text-5xl font-black tracking-tight font-mono-tabular">{formatTime(departure)}</div>
+            <div className="text-lg sm:text-2xl font-bold mt-1 break-keep">에는 나가야 해요</div>
+            <div className="grid grid-cols-3 gap-2 mt-5 text-center">
+              <MiniInfo label="준비 시작" value={formatTime(prepStart)} />
+              <MiniInfo label="도착 목표" value={formatTime(arrival)} />
+              <MiniInfo label="총 필요" value={`${plan.prepTotal + plan.moveMin + plan.bufferMin}분`} />
+            </div>
+          </div>
 
-      useEffect(() => { save(STORAGE.tasks, tasks); }, [tasks]);
-      useEffect(() => { save(STORAGE.meta, { startMode, startTime, view, mode }); }, [startMode, startTime, view, mode]);
-      useEffect(() => { save(STORAGE.apiKey, apiKey); }, [apiKey]);
+          <div className="p-4 sm:p-6 space-y-4">
+            <div className={`border rounded-2xl p-3 ${risk.color}`}>
+              <div className="font-bold">{risk.label}</div>
+              <div className="text-sm opacity-80 mt-0.5">{risk.detail}</div>
+              {(risk.level === 'danger' || risk.level === 'tight') && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button onClick={onEmergency} className="px-3 py-2 bg-white/80 rounded-xl text-xs font-bold border border-current/10">비상 준비로 바꾸기</button>
+                  <LateMessageButton plan={plan} />
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl bg-stone-50 border border-stone-100 p-4">
+              <div className="text-xs text-stone-500 mb-1">지금 시작할 첫 단계</div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xl font-black truncate">{firstTask?.name || '준비 완료'}</div>
+                  <div className="text-sm text-stone-500 mt-1">다음 단계는 타이머 화면에서 하나씩 보여드려요.</div>
+                </div>
+                <button onClick={() => onStartFocus(plan)} className="shrink-0 px-4 py-3 bg-emerald-600 text-white rounded-2xl font-bold flex items-center gap-2 active:scale-[.98]">
+                  <IconPlay className="w-4 h-4" /> 시작
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {onSavePlace && <button onClick={onSavePlace} className="px-3 py-2 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">이 장소 이동시간 저장</button>}
+              <button onClick={() => setShowAll(!showAll)} className="px-3 py-2 text-sm border border-stone-200 rounded-xl hover:bg-stone-50">{showAll ? '전체 일정 접기' : '전체 일정 보기'}</button>
+            </div>
+
+            {showAll && <TimelineList plan={plan} onEditTask={onEditTask} />}
+          </div>
+        </section>
+      );
+    }
+
+    function MiniInfo({ label, value }) {
+      return <div className="bg-white/10 rounded-2xl px-2 py-3"><div className="text-[11px] text-stone-400">{label}</div><div className="font-bold font-mono-tabular mt-0.5">{value}</div></div>;
+    }
+
+    function TimelineList({ plan, onEditTask }) {
+      const departure = new Date(plan.departureDeadline);
+      const arrival = new Date(plan.arrivalAt);
+      return (
+        <div className="space-y-2 pt-2">
+          {plan.tasks.map((task, index) => (
+            <div key={task.id} className="flex items-center gap-3 p-3 rounded-2xl border border-stone-100 bg-white">
+              <div className="w-14 text-xs font-mono-tabular text-stone-500">{formatTime(new Date(task.start))}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold truncate">{task.name}</div>
+                <div className="text-xs text-stone-500">{formatTime(new Date(task.start))} - {formatTime(new Date(task.end))} · {task.duration}분</div>
+              </div>
+              <button onClick={() => onEditTask(task)} className="p-2 text-stone-400 hover:text-stone-950 hover:bg-stone-100 rounded-xl"><IconEdit className="w-4 h-4" /></button>
+            </div>
+          ))}
+          <div className="flex items-center gap-3 p-3 rounded-2xl border border-stone-200 bg-stone-50">
+            <div className="w-14 text-xs font-mono-tabular text-stone-500">{formatTime(departure)}</div>
+            <div className="flex-1"><div className="font-black">출발</div><div className="text-xs text-stone-500">이동 {plan.moveMin}분 · 여유 {plan.bufferMin}분 포함</div></div>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-2xl border border-stone-200 bg-stone-950 text-white">
+            <div className="w-14 text-xs font-mono-tabular text-stone-300">{formatTime(arrival)}</div>
+            <div className="flex-1"><div className="font-black">도착</div><div className="text-xs text-stone-300">{plan.place}</div></div>
+          </div>
+        </div>
+      );
+    }
+
+    function LateMessageButton({ plan }) {
+      const [copied, setCopied] = useState(false);
+      const copy = async () => {
+        const risk = getRisk(plan);
+        const text = `안녕하세요. 이동 준비 시간이 예상보다 지연되어 ${Math.max(5, Math.ceil(Math.max(risk.missing, 5) / 5) * 5)}분 정도 늦을 것 같습니다. 도착하는 대로 바로 연락드리겠습니다.`;
+        try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { alert(text); }
+      };
+      return <button onClick={copy} className="px-3 py-2 bg-white/80 rounded-xl text-xs font-bold border border-current/10">{copied ? '복사 완료' : '늦는다고 연락 문구'}</button>;
+    }
+
+    function FocusMode({ initialPlan, onClose, onUpdatePlan }) {
+      const [plan, setPlan] = useState(() => ({ ...initialPlan, tasks: initialPlan.tasks.map(t => ({ ...t, status: 'todo' })) }));
+      const [index, setIndex] = useState(0);
+      const [running, setRunning] = useState(true);
+      const [targetSec, setTargetSec] = useState((initialPlan.tasks[0]?.duration || 1) * 60);
+      const [leftSec, setLeftSec] = useState((initialPlan.tasks[0]?.duration || 1) * 60);
+      const startRef = useRef(Date.now());
+      const wakeLockRef = useRef(null);
+
+      const task = plan.tasks[index];
+      const nextTask = plan.tasks[index + 1];
+      const departure = new Date(plan.departureDeadline);
+      const arrival = new Date(plan.arrivalAt);
 
       useEffect(() => {
-        if (!apiKey) { const t = setTimeout(() => setShowApiKeyModal(true), 500); return () => clearTimeout(t); }
+        const lock = async () => {
+          try {
+            if ('wakeLock' in navigator) wakeLockRef.current = await navigator.wakeLock.request('screen');
+          } catch {}
+        };
+        lock();
+        return () => {
+          try { wakeLockRef.current?.release?.(); } catch {}
+          try { if (document.fullscreenElement) document.exitFullscreen?.(); } catch {}
+        };
       }, []);
 
-      const friendlyError = (msg) => {
-        if (!msg) return '';
-        if (msg.includes('quota') || msg.includes('Quota')) return '⏱️ API 사용 한도를 초과했어요.';
-        if (msg.includes('API key') || msg.includes('API_KEY') || msg.includes('invalid') || msg.includes('not found')) return '🔑 API 키나 모델에 문제가 있어요.';
-        if (msg.includes('429')) return '⏱️ 너무 자주 요청했어요. 잠시 후 다시 시도해주세요.';
-        if (msg.length > 120) return msg.slice(0, 120) + '...';
-        return msg;
-      };
-
-      const handleAnalyze = async () => {
-        if (!apiKey) { setShowApiKeyModal(true); return; }
-        if (!rawInput.trim()) { setError('할 일을 먼저 입력해주세요'); return; }
-        setLoading(true); setError('');
-        try {
-          const result = await analyzeTasks(rawInput, apiKey, mode);
-          setTasks(result); setRawInput('');
-        } catch (e) { setError(e.message); }
-        finally { setLoading(false); }
-      };
-
-      const cycleStatus = (id) => {
-        setTasks(prev => prev.map(t => {
-          if (t.id !== id) {
-            const target = prev.find(p => p.id === id);
-            if (target && target.status === 'todo' && t.status === 'doing') return { ...t, status: 'todo' };
-            return t;
-          }
-          const next = { todo: 'doing', doing: 'done', done: 'todo' }[t.status];
-          return { ...t, status: next };
-        }));
-      };
-
-      const removeTask = (id) => setTasks(tasks.filter(t => t.id !== id));
-
-      const updateTask = async (updated, resort) => {
-        const newTasks = tasks.map(t => t.id === updated.id ? updated : t);
-        if (resort && apiKey) {
-          setLoading(true); setError('');
-          try {
-            const resorted = await resortTasks(newTasks, apiKey);
-            setTasks(resorted);
-          } catch (e) { setError(e.message); setTasks(newTasks); }
-          finally { setLoading(false); }
-        } else { setTasks(newTasks); }
-      };
-
-      const resizeDuration = async (taskId, newDuration) => {
-        const updated = tasks.map(t => {
-          if (t.id !== taskId) return t;
-          const newD = Math.max(1, newDuration);
-          return { ...t, duration: newD, activeTime: t.parallel ? Math.min(t.activeTime, newD) : newD };
-        });
-        if (!apiKey) { setTasks(updated); return; }
-        setLoading(true); setError('');
-        try {
-          const resorted = await resortTasks(updated, apiKey);
-          setTasks(resorted);
-        } catch (e) { setError(e.message); setTasks(updated); }
-        finally { setLoading(false); }
-      };
-
-      const clearAll = () => { if (confirm('모든 일정을 지울까요?')) setTasks([]); };
-
-      const totalDuration = tasks.length === 0 ? 0 : Math.max(...tasks.map(t => t.startMin + t.duration));
-      const baseTime = getBaseTime(startMode, startTime);
-      const activeTask = tasks.find(t => t.status === 'doing');
-
-      const statusConfig = {
-        done:  { Icon: IconCheck,  bar: 'bg-stone-300', text: 'text-stone-400 line-through', iconColor: 'text-stone-300' },
-        doing: { Icon: IconPlay,   bar: 'bg-emerald-500', text: 'text-stone-900 font-medium', iconColor: 'text-emerald-500' },
-        todo:  { Icon: IconCircle, bar: 'bg-stone-800', text: 'text-stone-700', iconColor: 'text-stone-400' },
-      };
-
-      const counts = {
-        done: tasks.filter(t => t.status === 'done').length,
-        doing: tasks.filter(t => t.status === 'doing').length,
-        todo: tasks.filter(t => t.status === 'todo').length,
-      };
-
-      return (
-        <div className="min-h-screen bg-stone-50">
-          <nav className="bg-white border-b border-stone-200 sticky top-0 z-20">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-stone-900 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold tracking-tight">L</span>
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-stone-900 tracking-tight leading-none">LUPL Planner</div>
-                  <div className="text-[10px] text-stone-400 leading-none mt-0.5">AI 일정 정리</div>
-                </div>
-              </div>
-              <button onClick={() => setShowApiKeyModal(true)} className="p-2 hover:bg-stone-100 rounded-lg text-stone-600">
-                <IconSettings className="w-4 h-4" />
-              </button>
-            </div>
-          </nav>
-
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
-            {!apiKey && (
-              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center justify-between gap-2">
-                <span>AI 분석을 쓰려면 Gemini API 키 설정이 필요해요. (무료)</span>
-                <button onClick={() => setShowApiKeyModal(true)} className="px-2.5 py-1 bg-amber-900 text-white rounded-md text-[11px] whitespace-nowrap">키 설정</button>
-              </div>
-            )}
-
-            {activeTask && (
-              <FocusTimer
-                task={activeTask}
-                onComplete={() => cycleStatus(activeTask.id)}
-                onStop={() => setTasks(tasks.map(t => t.id === activeTask.id ? { ...t, status: 'todo' } : t))}
-              />
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
-              <section className="lg:col-span-2 bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold text-stone-900">할 일 입력</h2>
-                  <span className="text-xs text-stone-400">{rawInput.split('\n').filter(l => l.trim()).length}개</span>
-                </div>
-
-                <div className="flex items-center gap-1 bg-stone-100 rounded-xl p-1 mb-3">
-                  <button onClick={() => setMode('normal')}
-                    className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition flex items-center justify-center gap-1 ${mode === 'normal' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
-                    <IconList className="w-3 h-3" />일반
-                  </button>
-                  <button onClick={() => setMode('breakdown')}
-                    className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition flex items-center justify-center gap-1 ${mode === 'breakdown' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
-                    <IconLayers className="w-3 h-3" />세분화
-                  </button>
-                </div>
-                {mode === 'breakdown' && (
-                  <p className="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-2 rounded-lg mb-3 leading-relaxed">
-                    💡 큰 일이나 프로젝트를 입력하면 ADHD도 따라하기 쉬운 작은 단계로 잘게 쪼개드려요
-                  </p>
-                )}
-
-                <textarea value={rawInput} onChange={(e) => setRawInput(e.target.value)}
-                  placeholder={mode === 'breakdown' ? "큰 일을 한 줄로 적으세요\n예: 보고서 작성하기" : "줄바꿈으로 구분해서 입력\n예: 밥 짓기\n냉장고 청소\n빨래 돌리기"}
-                  className="w-full h-32 sm:h-40 p-3 text-sm border border-stone-200 rounded-xl resize-none focus:outline-none focus:border-stone-900 bg-stone-50/50" />
-
-                <div className="mt-4 space-y-2">
-                  <label className="text-xs font-medium text-stone-700">시작 시간</label>
-                  <div className="flex items-center gap-1 bg-stone-100 rounded-xl p-1">
-                    <button onClick={() => setStartMode('now')} className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'now' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>지금 바로</button>
-                    <button onClick={() => setStartMode('scheduled')} className={`flex-1 py-1.5 px-2 text-xs rounded-lg transition truncate ${startMode === 'scheduled' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>시간 지정</button>
-                  </div>
-                  {startMode === 'scheduled' && (
-                    <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full mt-2 px-3 py-2 text-sm border border-stone-200 rounded-xl focus:outline-none focus:border-stone-900" />
-                  )}
-                </div>
-
-                {error && (
-                  <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 break-words">
-                    {friendlyError(error)}
-                  </div>
-                )}
-
-                <button onClick={handleAnalyze} disabled={loading || !rawInput.trim()}
-                  className="w-full mt-4 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-medium hover:bg-stone-800 disabled:opacity-40 transition flex items-center justify-center gap-1.5">
-                  {loading ? <><IconLoader className="w-4 h-4" />분석 중…</> : <><IconSparkles className="w-4 h-4" />{mode === 'breakdown' ? 'AI로 세분화하기' : 'AI로 분석하기'}</>}
-                </button>
-
-                <div className="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-emerald-500' : 'bg-stone-300'}`} />
-                    <span>{apiKey ? 'Gemini 2.5 Flash Lite' : '키 미설정'}</span>
-                  </div>
-                  {tasks.length > 0 && (
-                    <button onClick={clearAll} className="text-stone-400 hover:text-red-600">전체 삭제</button>
-                  )}
-                </div>
-              </section>
-
-              <section className="lg:col-span-3 bg-white rounded-2xl border border-stone-200 p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                  <div className="min-w-0">
-                    <h2 className="text-sm font-semibold text-stone-900">정렬된 일정</h2>
-                    {tasks.length > 0 ? (
-                      <p className="text-xs text-stone-500 mt-0.5">
-                        {formatTime(baseTime, 0)} 시작 · 총 {totalDuration}분
-                        {totalDuration >= 60 && ` (${Math.floor(totalDuration/60)}시간 ${totalDuration%60}분)`}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-stone-500 mt-0.5">할 일을 입력하고 분석을 시작해주세요</p>
-                    )}
-                  </div>
-                  {tasks.length > 0 && (
-                    <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
-                      <button onClick={() => setView('timeline')} className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'timeline' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
-                        <IconChart className="w-3.5 h-3.5" />타임라인
-                      </button>
-                      <button onClick={() => setView('checklist')} className={`px-2.5 py-1.5 rounded-md text-xs flex items-center gap-1 transition ${view === 'checklist' ? 'bg-white text-stone-900 shadow-sm font-medium' : 'text-stone-500'}`}>
-                        <IconList className="w-3.5 h-3.5" />체크리스트
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {tasks.length === 0 && (
-                  <div className="py-12 text-center text-stone-400 text-sm">
-                    <IconSparkles className="w-8 h-8 mx-auto mb-3 text-stone-300" />
-                    아직 분석된 일정이 없어요
-                    <div className="text-xs text-stone-300 mt-1">왼쪽에서 할 일을 입력해주세요</div>
-                  </div>
-                )}
-
-                {tasks.length > 0 && view === 'timeline' && (
-                  <TimelineView
-                    tasks={tasks} totalDuration={totalDuration} baseTime={baseTime}
-                    statusConfig={statusConfig} onCycleStatus={cycleStatus} onEdit={setEditTask} onResize={resizeDuration}
-                  />
-                )}
-
-                {tasks.length > 0 && view === 'checklist' && (
-                  <ChecklistView
-                    tasks={tasks} baseTime={baseTime} statusConfig={statusConfig}
-                    onCycleStatus={cycleStatus} onEdit={setEditTask} onRemove={removeTask}
-                  />
-                )}
-
-                {tasks.length > 0 && (
-                  <div className="mt-5 pt-4 border-t border-stone-100 grid grid-cols-3 gap-3 text-center">
-                    <div><div className="text-lg font-bold text-stone-900">{counts.done}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">완료</div></div>
-                    <div><div className="text-lg font-bold text-emerald-600">{counts.doing}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">진행중</div></div>
-                    <div><div className="text-lg font-bold text-stone-900">{counts.todo}</div><div className="text-[10px] text-stone-500 uppercase tracking-wider">예정</div></div>
-                  </div>
-                )}
-              </section>
-            </div>
-
-            <footer className="mt-6 text-center text-[11px] text-stone-400">
-              LUPL Planner · 데이터는 이 브라우저에 저장됩니다
-            </footer>
-          </div>
-
-          <ApiKeyModal open={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} onSave={setApiKey} currentKey={apiKey} />
-          <EditTaskModal task={editTask} onClose={() => setEditTask(null)} onSave={updateTask} onDelete={removeTask} />
-        </div>
-      );
-    }
-
-    function TimelineView({ tasks, totalDuration, baseTime, statusConfig, onCycleStatus, onEdit, onResize }) {
-      return (
-        <div className="space-y-3">
-          <div className="hidden sm:block relative h-5 ml-28 mr-1">
-            {[0, 0.25, 0.5, 0.75, 1].map((pct) => (
-              <div key={pct} className="absolute top-0 text-[10px] text-stone-400" style={{ left: `${pct * 100}%`, transform: 'translateX(-50%)' }}>
-                {formatTime(baseTime, Math.round(totalDuration * pct))}
-              </div>
-            ))}
-          </div>
-          <div className="sm:hidden flex justify-between text-[10px] text-stone-400 px-1 mb-1">
-            <span>{formatTime(baseTime, 0)}</span>
-            <span>{formatTime(baseTime, Math.round(totalDuration / 2))}</span>
-            <span>{formatTime(baseTime, totalDuration)}</span>
-          </div>
-
-          {tasks.map((task) => (
-            <TimelineRow key={task.id} task={task} totalDuration={totalDuration} baseTime={baseTime}
-              statusConfig={statusConfig} onCycleStatus={onCycleStatus} onEdit={onEdit} onResize={onResize} />
-          ))}
-
-          <div className="flex flex-wrap items-center gap-3 pt-3 mt-3 border-t border-stone-100 text-[11px] text-stone-500">
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-900" />능동</div>
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-stone-300" />대기 (병렬)</div>
-            <div className="flex items-center gap-1.5 text-stone-400">⇄ 막대 끝 드래그로 시간 조절</div>
-          </div>
-        </div>
-      );
-    }
-
-    function TimelineRow({ task, totalDuration, baseTime, statusConfig, onCycleStatus, onEdit, onResize }) {
-      const cfg = statusConfig[task.status];
-      const barRef = useRef(null);
-      const [dragging, setDragging] = useState(false);
-      const [dragWidth, setDragWidth] = useState(null);
-      const startRef = useRef(null);
-
-      const effectiveDuration = dragWidth !== null ? dragWidth : task.duration;
-      const leftPct = (task.startMin / totalDuration) * 100;
-      const widthPct = (effectiveDuration / totalDuration) * 100;
-      const activePct = (task.activeTime / effectiveDuration) * 100;
-      const isBarTiny = widthPct < 12;
+      useEffect(() => {
+        if (!task) return;
+        const sec = Math.max(60, Number(task.duration || 1) * 60);
+        setTargetSec(sec);
+        setLeftSec(sec);
+        setRunning(true);
+        startRef.current = Date.now();
+      }, [index, task?.id]);
 
       useEffect(() => {
-        if (!dragging) return;
-        const onMove = (e) => {
-          if (!startRef.current) return;
-          const x = e.touches ? e.touches[0].clientX : e.clientX;
-          const dx = x - startRef.current.startX;
-          const minDelta = Math.round(dx / startRef.current.pixelsPerMin);
-          const newD = Math.max(1, startRef.current.originalDuration + minDelta);
-          setDragWidth(newD);
-          if (e.touches) e.preventDefault();
+        if (!running || !task) return;
+        const tick = () => {
+          const elapsed = Math.floor((Date.now() - startRef.current) / 1000);
+          setLeftSec(Math.max(0, targetSec - elapsed));
         };
-        const onUp = () => {
-          if (dragWidth !== null && dragWidth !== task.duration) onResize(dragWidth);
-          setDragging(false); setDragWidth(null); startRef.current = null;
-        };
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onUp);
-        window.addEventListener('touchmove', onMove, { passive: false });
-        window.addEventListener('touchend', onUp);
-        return () => {
-          window.removeEventListener('mousemove', onMove);
-          window.removeEventListener('mouseup', onUp);
-          window.removeEventListener('touchmove', onMove);
-          window.removeEventListener('touchend', onUp);
-        };
-      }, [dragging, dragWidth, task.duration, onResize]);
+        tick();
+        const id = setInterval(tick, 250);
+        return () => clearInterval(id);
+      }, [running, targetSec, task?.id]);
 
-      const startDrag = (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const x = e.touches ? e.touches[0].clientX : e.clientX;
-        const rect = barRef.current.getBoundingClientRect();
-        startRef.current = {
-          startX: x, originalDuration: task.duration,
-          pixelsPerMin: rect.width / totalDuration,
-        };
-        setDragging(true);
+      const syncPlan = (nextPlan) => {
+        setPlan(nextPlan);
+        onUpdatePlan(nextPlan);
       };
 
+      const complete = () => {
+        if (!task) return;
+        const tasks = plan.tasks.map((t, i) => i === index ? { ...t, status: 'done' } : t);
+        const nextPlan = { ...plan, tasks };
+        syncPlan(nextPlan);
+        if (index + 1 < plan.tasks.length) setIndex(index + 1);
+        else setIndex(plan.tasks.length);
+      };
+
+      const skip = () => {
+        if (!task) return;
+        const tasks = plan.tasks.map((t, i) => i === index ? { ...t, status: 'skipped' } : t);
+        const nextPlan = { ...plan, tasks };
+        syncPlan(nextPlan);
+        if (index + 1 < plan.tasks.length) setIndex(index + 1);
+        else setIndex(plan.tasks.length);
+      };
+
+      const addFive = () => {
+        if (!task) return;
+        const tasks = plan.tasks.map((t, i) => i === index ? { ...t, duration: Number(t.duration || 0) + 5 } : t);
+        const nextPlan = recalcPlan(plan, tasks);
+        syncPlan(nextPlan);
+        setTargetSec(prev => prev + 300);
+        setLeftSec(prev => prev + 300);
+        startRef.current = Date.now() - (targetSec - leftSec) * 1000;
+      };
+
+      const toggle = () => {
+        if (running) setRunning(false);
+        else {
+          startRef.current = Date.now() - (targetSec - leftSec) * 1000;
+          setRunning(true);
+        }
+      };
+
+      const doneAll = index >= plan.tasks.length;
+      const risk = getRisk(plan);
+
       return (
-        <div className="group">
-          <div className="sm:hidden flex items-center justify-between mb-1 px-1">
-            <button onClick={() => onCycleStatus(task.id)} className="flex items-center gap-1.5 min-w-0 flex-1">
-              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
-              <span className={`text-xs truncate ${cfg.text}`}>{task.name}</span>
-              {task.parallel && <span className="text-[9px] text-emerald-600 font-medium shrink-0">⇅</span>}
-            </button>
-            <button onClick={() => onEdit(task)} className="text-[10px] text-stone-400 px-1.5 py-0.5 hover:text-stone-700">수정</button>
+        <div className="fixed inset-0 z-50 bg-stone-950 text-white flex flex-col">
+          <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-stone-400"><span className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />집중 모드</div>
+            <button onClick={onClose} className="p-2 rounded-xl bg-white/10 text-stone-300"><IconX className="w-5 h-5" /></button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={() => onCycleStatus(task.id)} className="hidden sm:flex w-28 shrink-0 text-left text-sm items-center gap-1.5">
-              <cfg.Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconColor}`} />
-              <span className={`truncate ${cfg.text}`}>{task.name}</span>
-            </button>
-
-            <div ref={barRef} className="flex-1 relative h-8 bg-stone-100/70 rounded-md">
-              <div
-                onClick={() => !dragging && onEdit(task)}
-                className={`absolute top-0 h-full rounded-md ${cfg.bar} ${task.status === 'done' ? 'opacity-40' : ''} ${dragging ? 'ring-2 ring-emerald-400' : 'cursor-pointer'} transition-colors`}
-                style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-              >
-                {task.parallel && task.status !== 'done' && (
-                  <div className="absolute top-0 h-full bg-stone-900/70 rounded-l-md" style={{ width: `${activePct}%` }} />
-                )}
-                {!isBarTiny && (
-                  <span className="absolute inset-0 flex items-center px-2 text-[11px] sm:text-xs text-white font-medium pointer-events-none">
-                    {effectiveDuration}분
-                  </span>
-                )}
-                {task.status !== 'done' && (
-                  <div className="drag-handle absolute right-0 top-0 h-full w-4 -mr-2 flex items-center justify-center"
-                    onMouseDown={startDrag} onTouchStart={startDrag}>
-                    <div className="w-1 h-4 bg-white/70 rounded-full pointer-events-none" />
-                  </div>
-                )}
-              </div>
-              {isBarTiny && (
-                <span className="absolute top-1/2 -translate-y-1/2 text-[10px] sm:text-xs font-medium text-stone-700 pointer-events-none whitespace-nowrap"
-                  style={{ left: `calc(${leftPct + widthPct}% + 8px)` }}>
-                  {effectiveDuration}분
-                </span>
-              )}
-              {task.parallel && (
-                <span className="hidden sm:block absolute -top-1 text-[9px] text-emerald-600 font-medium" style={{ left: `${leftPct}%` }}>⇅ 병렬</span>
-              )}
-              {dragging && dragWidth !== null && (
-                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-[10px] px-2 py-0.5 rounded-md whitespace-nowrap z-10">
-                  {dragWidth}분
+          <div className="flex-1 flex flex-col justify-center px-6 py-4 text-center">
+            {!doneAll ? (
+              <>
+                <div className="text-sm text-stone-400 mb-3">지금 할 일</div>
+                <div className="text-4xl sm:text-6xl font-black tracking-tight break-keep mb-6">{task.name}</div>
+                <div className={`text-7xl sm:text-8xl font-black font-mono-tabular tracking-tighter ${leftSec === 0 ? 'text-red-400' : 'text-white'}`}>{countdownLabel(leftSec)}</div>
+                <div className="mt-5 grid grid-cols-2 gap-3 text-left max-w-md mx-auto w-full">
+                  <FocusInfo label="출발 마감" value={formatTime(new Date(plan.departureDeadline))} />
+                  <FocusInfo label="도착 목표" value={formatTime(arrival)} />
                 </div>
-              )}
+                <div className="mt-4 text-sm text-stone-400">다음: {nextTask ? nextTask.name : '출발 준비'}</div>
+                {leftSec === 0 && <div className="mt-4 text-red-300 font-bold">예정 시간이 지났어요. 완료하거나 5분을 추가해보세요.</div>}
+              </>
+            ) : (
+              <>
+                <div className="text-sm text-stone-400 mb-3">준비 완료</div>
+                <div className="text-4xl sm:text-6xl font-black tracking-tight break-keep mb-6">지금 나가면 돼요</div>
+                <div className="text-6xl sm:text-8xl font-black font-mono-tabular tracking-tighter">{formatTime(departure)}</div>
+                <div className="mt-5 text-stone-400">도착 목표 {formatTime(arrival)} · {plan.place}</div>
+              </>
+            )}
+          </div>
+
+          <div className="p-5 safe-bottom bg-stone-900 border-t border-white/10">
+            {!doneAll ? (
+              <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
+                <button onClick={complete} className="col-span-2 py-4 bg-emerald-500 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-2 active:scale-[.98]"><IconCheck className="w-5 h-5" />완료</button>
+                <button onClick={addFive} className="py-3 bg-white/10 rounded-2xl font-bold">5분 더 필요</button>
+                <button onClick={skip} className="py-3 bg-white/10 rounded-2xl font-bold">건너뛰기</button>
+                <button onClick={toggle} className="col-span-2 py-3 bg-white text-stone-950 rounded-2xl font-bold flex items-center justify-center gap-2">{running ? <IconPause className="w-4 h-4" /> : <IconPlay className="w-4 h-4" />}{running ? '잠시 멈춤' : '다시 시작'}</button>
+              </div>
+            ) : (
+              <button onClick={onClose} className="w-full max-w-md mx-auto block py-4 bg-white text-stone-950 rounded-2xl font-black">종료하기</button>
+            )}
+            <div className="mt-3 text-center text-xs text-stone-500">전체화면과 화면 켜짐 유지로 딴짓을 줄여요. 브라우저 권한에 따라 일부 기기에서는 제한될 수 있어요.</div>
+          </div>
+        </div>
+      );
+    }
+
+    function FocusInfo({ label, value }) {
+      return <div className="bg-white/10 rounded-2xl px-4 py-3"><div className="text-xs text-stone-400">{label}</div><div className="font-black font-mono-tabular text-xl mt-1">{value}</div></div>;
+    }
+
+    function TaskEditModal({ task, onClose, onSave }) {
+      const [duration, setDuration] = useState(task.duration || 10);
+      return (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div><div className="text-xs text-stone-500">시간 수정</div><h2 className="text-xl font-black">{task.name}</h2></div>
+              <button onClick={onClose} className="p-2 rounded-xl hover:bg-stone-100"><IconX className="w-5 h-5" /></button>
             </div>
+            <Field label="몇 분 걸리나요?">
+              <input type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)} className="input text-2xl font-black font-mono-tabular" />
+            </Field>
+            <div className="grid grid-cols-2 gap-2 mt-5">
+              <button onClick={() => onSave(task, Number(duration), false)} className="py-3 rounded-2xl border border-stone-200 font-bold">이번만 적용</button>
+              <button onClick={() => onSave(task, Number(duration), true)} className="py-3 rounded-2xl bg-stone-950 text-white font-bold">앞으로도 기억</button>
+            </div>
+            <div className="text-xs text-stone-500 mt-3">예: 씻기를 30분으로 기억하면 다음부터 ‘씻기’, ‘샤워’를 입력했을 때 30분으로 불러와요.</div>
           </div>
         </div>
       );
     }
 
-    function ChecklistView({ tasks, baseTime, statusConfig, onCycleStatus, onEdit, onRemove }) {
+    function PlansPage({ plans, onOpen, onDelete }) {
       return (
-        <div className="space-y-2">
-          {tasks.map((task, idx) => {
-            const cfg = statusConfig[task.status];
-            return (
-              <div key={task.id} className={`group flex items-center gap-3 p-3 rounded-xl border transition ${task.status === 'doing' ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-100 hover:border-stone-200 hover:bg-stone-50/50'}`}>
-                <button onClick={() => onCycleStatus(task.id)} className="shrink-0">
-                  <cfg.Icon className={`w-5 h-5 ${cfg.iconColor}`} />
-                </button>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] text-stone-400 font-mono">#{idx + 1}</span>
-                    <span className={`text-sm ${cfg.text}`}>{task.name}</span>
-                    {task.parallel && <span className="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-medium">병렬</span>}
+        <section className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+          <div className="mb-5">
+            <h1 className="text-2xl font-black">저장된 일정</h1>
+            <p className="text-sm text-stone-500 mt-1">최근 계산한 준비 일정을 다시 열 수 있어요.</p>
+          </div>
+          {plans.length === 0 ? (
+            <div className="py-16 text-center text-stone-400">아직 저장된 일정이 없어요.</div>
+          ) : (
+            <div className="space-y-2">
+              {plans.map(plan => {
+                const risk = getRisk(plan);
+                return (
+                  <div key={plan.id} className="p-4 border border-stone-100 rounded-2xl hover:bg-stone-50">
+                    <div className="flex items-start justify-between gap-3">
+                      <button onClick={() => onOpen(plan)} className="text-left flex-1 min-w-0">
+                        <div className="font-black truncate">{plan.title}</div>
+                        <div className="text-sm text-stone-500 mt-1">출발 {formatTime(new Date(plan.departureDeadline))} · 도착 {formatTime(new Date(plan.arrivalAt))} · {plan.place}</div>
+                        <div className="text-xs text-stone-400 mt-1">{risk.label}</div>
+                      </button>
+                      <button onClick={() => onDelete(plan.id)} className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl"><IconTrash className="w-4 h-4" /></button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-500 flex-wrap">
-                    <IconClock className="w-3 h-3" />
-                    <span>{formatTime(baseTime, task.startMin)} – {formatTime(baseTime, task.startMin + task.duration)}</span>
-                    <span className="text-stone-300">·</span>
-                    <span>{task.duration}분</span>
-                    {task.parallel && task.activeTime !== task.duration && (
-                      <><span className="text-stone-300">·</span><span>능동 {task.activeTime}분</span></>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => onEdit(task)} className="px-2 py-1.5 text-xs text-stone-500 hover:bg-stone-100 rounded-lg">수정</button>
-                  <button onClick={() => onRemove(task.id)} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                    <IconTrash className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    function PresetsPage({ actions, setActions, places, setPlaces }) {
+      const [mode, setMode] = useState('actions');
+      return (
+        <div className="space-y-4">
+          <section className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+            <h1 className="text-2xl font-black">내 시간</h1>
+            <p className="text-sm text-stone-500 mt-1">자주 하는 행동과 장소 시간을 저장해두면 다음 일정에 자동으로 불러와요.</p>
+            <div className="mt-4 grid grid-cols-2 gap-1 bg-stone-100 rounded-2xl p-1 max-w-sm">
+              <button onClick={() => setMode('actions')} className={`py-2 rounded-xl text-sm font-bold ${mode === 'actions' ? 'bg-white shadow-sm' : 'text-stone-500'}`}>행동</button>
+              <button onClick={() => setMode('places')} className={`py-2 rounded-xl text-sm font-bold ${mode === 'places' ? 'bg-white shadow-sm' : 'text-stone-500'}`}>장소</button>
+            </div>
+          </section>
+          {mode === 'actions' ? <ActionPresets actions={actions} setActions={setActions} /> : <PlacePresets places={places} setPlaces={setPlaces} />}
         </div>
       );
     }
+
+    function ActionPresets({ actions, setActions }) {
+      const [draft, setDraft] = useState({ name: '', duration: 10, aliases: '', category: '준비', optional: false });
+      const add = () => {
+        if (!draft.name.trim()) return;
+        setActions(prev => [{ ...draft, id: uid(), duration: Math.max(1, Number(draft.duration || 1)) }, ...prev]);
+        setDraft({ name: '', duration: 10, aliases: '', category: '준비', optional: false });
+      };
+      return (
+        <section className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-4">
+            <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} className="input sm:col-span-2" placeholder="행동명 예: 씻기" />
+            <input type="number" min="1" value={draft.duration} onChange={e => setDraft({ ...draft, duration: e.target.value })} className="input" placeholder="분" />
+            <input value={draft.aliases} onChange={e => setDraft({ ...draft, aliases: e.target.value })} className="input sm:col-span-2" placeholder="비슷한 말: 샤워, 머리감기" />
+            <label className="sm:col-span-4 flex items-center gap-2 text-sm text-stone-600 px-2"><input type="checkbox" checked={draft.optional} onChange={e => setDraft({ ...draft, optional: e.target.checked })} /> 비상 준비 때 생략 가능</label>
+            <button onClick={add} className="py-3 bg-stone-950 text-white rounded-2xl font-bold flex items-center justify-center gap-1"><IconPlus className="w-4 h-4" />추가</button>
+          </div>
+          <div className="space-y-2">
+            {actions.map(action => (
+              <ActionRow key={action.id} action={action} onChange={(next) => setActions(prev => prev.map(a => a.id === action.id ? next : a))} onDelete={() => setActions(prev => prev.filter(a => a.id !== action.id))} />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function ActionRow({ action, onChange, onDelete }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="border border-stone-100 rounded-2xl p-3">
+          <div className="flex items-center justify-between gap-3">
+            <button onClick={() => setOpen(!open)} className="text-left flex-1 min-w-0">
+              <div className="font-black truncate">{action.name} <span className="font-mono-tabular text-emerald-700">{action.duration}분</span></div>
+              <div className="text-xs text-stone-500 truncate">{action.aliases || '비슷한 표현 없음'} {action.optional ? '· 비상 시 생략 가능' : ''}</div>
+            </button>
+            <button onClick={onDelete} className="p-2 text-stone-400 hover:text-red-600 rounded-xl"><IconTrash className="w-4 h-4" /></button>
+          </div>
+          {open && (
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
+              <input value={action.name} onChange={e => onChange({ ...action, name: e.target.value })} className="input sm:col-span-2" />
+              <input type="number" min="1" value={action.duration} onChange={e => onChange({ ...action, duration: Math.max(1, Number(e.target.value || 1)) })} className="input" />
+              <input value={action.aliases} onChange={e => onChange({ ...action, aliases: e.target.value })} className="input sm:col-span-2" />
+              <label className="sm:col-span-5 flex items-center gap-2 text-sm text-stone-600 px-2"><input type="checkbox" checked={action.optional} onChange={e => onChange({ ...action, optional: e.target.checked })} /> 비상 준비 때 생략 가능</label>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function PlacePresets({ places, setPlaces }) {
+      const [draft, setDraft] = useState({ name: '', moveMin: 30, bufferMin: 15, transport: '차량' });
+      const add = () => {
+        if (!draft.name.trim()) return;
+        setPlaces(prev => [{ ...draft, id: uid(), moveMin: Math.max(0, Number(draft.moveMin || 0)), bufferMin: Math.max(0, Number(draft.bufferMin || 0)) }, ...prev]);
+        setDraft({ name: '', moveMin: 30, bufferMin: 15, transport: '차량' });
+      };
+      return (
+        <section className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-6 shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-4">
+            <input value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })} className="input sm:col-span-2" placeholder="장소명 예: 이룸고" />
+            <input type="number" min="0" value={draft.moveMin} onChange={e => setDraft({ ...draft, moveMin: e.target.value })} className="input" placeholder="이동 분" />
+            <input type="number" min="0" value={draft.bufferMin} onChange={e => setDraft({ ...draft, bufferMin: e.target.value })} className="input" placeholder="여유 분" />
+            <button onClick={add} className="py-3 bg-stone-950 text-white rounded-2xl font-bold flex items-center justify-center gap-1"><IconPlus className="w-4 h-4" />추가</button>
+          </div>
+          <div className="space-y-2">
+            {places.map(place => (
+              <PlaceRow key={place.id} place={place} onChange={(next) => setPlaces(prev => prev.map(p => p.id === place.id ? next : p))} onDelete={() => setPlaces(prev => prev.filter(p => p.id !== place.id))} />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function PlaceRow({ place, onChange, onDelete }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="border border-stone-100 rounded-2xl p-3">
+          <div className="flex items-center justify-between gap-3">
+            <button onClick={() => setOpen(!open)} className="text-left flex-1 min-w-0">
+              <div className="font-black truncate">{place.name}</div>
+              <div className="text-xs text-stone-500">이동 {place.moveMin}분 · 여유 {place.bufferMin}분 · {place.transport || '이동수단 미정'}</div>
+            </button>
+            <button onClick={onDelete} className="p-2 text-stone-400 hover:text-red-600 rounded-xl"><IconTrash className="w-4 h-4" /></button>
+          </div>
+          {open && (
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 mt-3">
+              <input value={place.name} onChange={e => onChange({ ...place, name: e.target.value })} className="input sm:col-span-2" />
+              <input type="number" min="0" value={place.moveMin} onChange={e => onChange({ ...place, moveMin: Math.max(0, Number(e.target.value || 0)) })} className="input" />
+              <input type="number" min="0" value={place.bufferMin} onChange={e => onChange({ ...place, bufferMin: Math.max(0, Number(e.target.value || 0)) })} className="input" />
+              <input value={place.transport || ''} onChange={e => onChange({ ...place, transport: e.target.value })} className="input" />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Toast({ text, onClose }) {
+      useEffect(() => {
+        const id = setTimeout(onClose, 2200);
+        return () => clearTimeout(id);
+      }, []);
+      return <div className="fixed left-4 right-4 bottom-24 sm:bottom-6 z-50 max-w-md mx-auto bg-stone-950 text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-bold text-center">{text}</div>;
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `.input{width:100%;border:1px solid rgb(231 229 228);background:rgb(250 250 249);border-radius:1rem;padding:.85rem 1rem;outline:none}.input:focus{border-color:rgb(17 24 39);background:white}`;
+    document.head.appendChild(style);
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
